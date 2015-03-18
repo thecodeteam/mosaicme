@@ -17,11 +17,12 @@ The following section provides an overview of the Use Cases for Mosaicme. There 
  
 Use Case	                          | Description
 ------------------------------------- | -----------|
-Retrieve Images from Twitter Accounts | Mosaicme retrieves images from the selected list of Twitter accounts and stores them in the Object store.
-Process Mosaic from selected Pictures | It will build a mosaic from a picture using the stored pictures. The resulting mosaic is then stored in the Object store.
-Mosaic "My" Picture					  | Mosaic me will build a mosaic based on the picture provided by the user.
+Retrieve images from Twitter accounts | Mosaicme retrieves images from the selected list of Twitter accounts and stores them in the Object store.
+Process a mosaic from selected pictures | It will build a mosaic from a picture using the stored pictures. The resulting mosaic is then stored in the Object store.
+Mosaic "My" picture					  | Mosaicme creates a mosaic based on the picture provided by the user.
 Display list Pictures				  | Shows the list of pictures currently stored in the system
 Configure Mosaicme 					  | Enables administrator to configure the system
+Mosaicme statistics                   | Generates a list of statistics based on usage, storage, and images meta data.			
 
 
 
