@@ -5,7 +5,7 @@ Mosaicme is a [Microservice](http://en.wikipedia.org/wiki/Microservices "Microse
 Mosaicme's goal is to provide developers with an example of how to build a distributed microservice application using Linux containers. It focuses on current best practices, showcases the use of Object stores,  the use of multiple [APIs](http://en.wikipedia.org/wiki/Application_programming_interface "APIs") ([REST](http://en.wikipedia.org/wiki/Representational_state_transfer "REST"), [S3](http://en.wikipedia.org/wiki/Amazon_S3 "AWS S3"), [SWIFT](http://en.wikipedia.org/wiki/OpenStack#Swift "OpenStack Swift"), [HDFS](http://en.wikipedia.org/wiki/Apache_Hadoop#HDFS "Haddop Distributed File System"), and [Twilio](https://www.twilio.com/ "Twilio.com")), and automated deployment models.
 
 
-[Architecture Diagram goes here]
+![Mosaicme high level architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/mosaicme-high-level-architecture.PNG)
 
 
 
