@@ -2,7 +2,7 @@
 
 Mosaicme is a [Microservice](http://en.wikipedia.org/wiki/Microservices "Microservices") application that retrieves images from selected Twitter feeds, stores them on an [object store](http://en.wikipedia.org/wiki/Object_storage "Object Store"), and then it process them to build a mosaic based on a selected set of pictures. 
 
-Mosaicme's goal is to provide developers with an example of how to build a distributed microservice application using Linux containers. It focuses on current best practices, showcases the use of Object stores,  the use of multiple [APIs](http://en.wikipedia.org/wiki/Application_programming_interface "APIs") ([REST](http://en.wikipedia.org/wiki/Representational_state_transfer "REST"), [S3](http://en.wikipedia.org/wiki/Amazon_S3 "AWS S3"), [SWIFT](http://en.wikipedia.org/wiki/OpenStack#Swift "OpenStack Swift"), [HDFS](http://en.wikipedia.org/wiki/Apache_Hadoop#HDFS "Haddop Distributed File System")), and automated deployment models.
+Mosaicme's goal is to provide developers with an example of how to build a distributed microservice application using Linux containers. It focuses on current best practices, showcases the use of Object stores,  the use of multiple [APIs](http://en.wikipedia.org/wiki/Application_programming_interface "APIs") ([REST](http://en.wikipedia.org/wiki/Representational_state_transfer "REST"), [S3](http://en.wikipedia.org/wiki/Amazon_S3 "AWS S3"), [SWIFT](http://en.wikipedia.org/wiki/OpenStack#Swift "OpenStack Swift"), [HDFS](http://en.wikipedia.org/wiki/Apache_Hadoop#HDFS "Haddop Distributed File System"), and [Twilio](https://www.twilio.com/ "Twilio.com")), and automated deployment models.
 
 
 [Architecture Diagram goes here]
@@ -20,7 +20,10 @@ Use Case	                          | Description
 Retrieve images from Twitter accounts | Mosaicme retrieves images from the selected list of Twitter accounts and stores them in the Object store.
 Process a mosaic from selected pictures | It will build a mosaic from a picture using the stored pictures. The resulting mosaic is then stored in the Object store.
 Mosaic "My" picture					  | Mosaicme creates a mosaic based on the picture provided by the user.
-Display list Pictures				  | Shows the list of pictures currently stored in the system
+Post Mosaic to Twitter Account		  | Mosaicme will post a mosaic to a selected Twitter account on a regular interval. This can be configured via the Configuration Section.
+Display list Pictures				  | Shows the list of pictures currently stored in the system.
+Display list Mosaics				  | Shows the list of mosaics currently stored in the system.
+SMS "My" Mosaic						  | Using Twilio Services, the System will SMS you the selected Mosaic, when you send it an SMS with the picture ID.
 Configure Mosaicme 					  | Enables administrator to configure the system
 Mosaicme statistics                   | Generates a list of statistics based on usage, storage, and images meta data.			
 
