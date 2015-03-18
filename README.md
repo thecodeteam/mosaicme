@@ -20,15 +20,12 @@ Use Case	                          | Description
 Retrieve images from Twitter accounts | Mosaicme retrieves images from the selected list of Twitter accounts and stores them in the Object store.
 Process a mosaic from selected pictures | It will build a mosaic from a picture using the stored pictures. The resulting mosaic is then stored in the Object store.
 Mosaic "My" picture					  | Mosaicme creates a mosaic based on the picture provided by the user.
-Post Mosaic to Twitter Account		  | Mosaicme will post a mosaic to a selected Twitter account on a regular interval. This can be configured via the Configuration Section.
+Post Mosaic to Twitter Account		  | Mosaicme will post a mosaic to a selected Twitter account(s) on a regular interval. This can be configured via the Configuration Section.
 Display list Pictures				  | Shows the list of pictures currently stored in the system.
 Display list Mosaics				  | Shows the list of mosaics currently stored in the system.
 SMS "My" Mosaic						  | Using Twilio Services, the System will SMS you the selected Mosaic, when you send it an SMS with the picture ID.
-Configure Mosaicme 					  | Enables administrator to configure the system
-Mosaicme statistics                   | Generates a list of statistics based on usage, storage, and images meta data.			
-
-
-
+Configure Mosaicme 					  | Enables administrator to configure the system via a web interface.
+Mosaicme statistics                   | Generates a list of statistics based on usage, storage, and images. meta data.			
 
 
 
@@ -40,12 +37,18 @@ Mosaicme is composed of multiple tiers. The following design shows the high leve
 
 The following has an overview of each one of the components
 
-Component Name |	Component Description
--------------- | ---------------------|
-Component 1    | Description. 
-Component 2    | Description.
-Component 3    | Description.
- 
+Component Name              |	Component Description
+--------------------------- | ---------------------|
+Web Interface               | Web Interface to for displaying pictures, mosaics, statistics and system configuration. 
+Orchestration API service   | API service that orchestrates interactions with all services in the application. 
+Mosaic processing service   | Mosaic processing service. Takes the mosaic generation request from the Orchestration API and generates the mosaic data and meta data.
+Statistics Service			| Haddop Cluster that takes the data in the Object Store and processes the statistics. Stores the data back to the Object store using HDFS.
+Queuing Service				| Service to host the queues required by the system.
+Caching Service             | Data caching service to speed the application.
+Configuration Service       | Service to maintain configuration, synchronization and naming registry.
+Twitter retrieval service   | Service that retrieves pictures and their meta data from the selected twitter accounts and adds them Object store.
+
+
 
 
 ### Component 1 
