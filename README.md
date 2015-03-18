@@ -2,11 +2,17 @@
 
 Mosaicme is a [Microservice](http://en.wikipedia.org/wiki/Microservices "Microservices") application that retrieves images from selected Twitter feeds, stores them on an [object store](http://en.wikipedia.org/wiki/Object_storage "Object Store"), and then it process them to build a mosaic based on a selected set of pictures. 
 
-Mosaicme's goal is to provide developers with an example of how to build a distributed microservice application using Linux containers. It focuses on current best practices, showcases the use of Object stores,  the use of multiple [APIs](http://en.wikipedia.org/wiki/Application_programming_interface "APIs") ([REST](http://en.wikipedia.org/wiki/Representational_state_transfer "REST"), [S3](http://en.wikipedia.org/wiki/Amazon_S3 "AWS S3"), [SWIFT](http://en.wikipedia.org/wiki/OpenStack#Swift "OpenStack Swift"), [HDFS](http://en.wikipedia.org/wiki/Apache_Hadoop#HDFS "Haddop Distributed File System"), and [Twilio](https://www.twilio.com/ "Twilio.com")), and automated deployment models.
+Mosaicme's goal is to provide developers with working example in how to build a distributed microservice application using best practices. The application includes the following 
 
-
-![Mosaicme high level architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/mosaicme-high-level-architecture.PNG)
-
+- Use of Linux containers to host each service.
+- Use of Object stores.
+- Restful APIs as communication Channel ([REST](http://en.wikipedia.org/wiki/Representational_state_transfer "REST"), [S3](http://en.wikipedia.org/wiki/Amazon_S3 "AWS S3"), [SWIFT](http://en.wikipedia.org/wiki/OpenStack#Swift "OpenStack Swift"), [HDFS](http://en.wikipedia.org/wiki/Apache_Hadoop#HDFS "Haddop Distributed File System"))
+- Use of External Services like Twitter and [Twilio](https://www.twilio.com/ "Twilio.com"))
+- Automated deployment model
+- Use of a Logging Router
+- Use of Queuing, Caching and Configuration Services 
+- Use of Haddop to calculate statistics
+- Use of Puppet/Chef to deploy the application 
 
 
 ## Use Cases
@@ -32,8 +38,9 @@ Mosaicme statistics                   | Generates a list of statistics based on 
 ## Architecture 
 
 Mosaicme is composed of multiple tiers. The following design shows the high level application architecture: 
+The following diagram shows Mosaicme high level architecture: 
 
-[Architecture Model image]
+![Mosaicme high level architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/mosaicme-high-level-architecture.PNG)
 
 The following has an overview of each one of the components
 
