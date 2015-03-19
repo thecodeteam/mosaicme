@@ -7,12 +7,12 @@ Mosaicme's goal is to provide developers with working example in how to build a 
 - Use of Linux containers to host each service.
 - Use of Object stores.
 - Restful APIs as communication Channel ([REST](http://en.wikipedia.org/wiki/Representational_state_transfer "REST"), [S3](http://en.wikipedia.org/wiki/Amazon_S3 "AWS S3"), [SWIFT](http://en.wikipedia.org/wiki/OpenStack#Swift "OpenStack Swift"), [HDFS](http://en.wikipedia.org/wiki/Apache_Hadoop#HDFS "Haddop Distributed File System"))
-- Use of External Services like Twitter and [Twilio](https://www.twilio.com/ "Twilio.com"))
-- Automated deployment model
+- Use of External Services like [Twitter](http://www.twitter.com "Twitter.com") and [Twilio](https://www.twilio.com/ "Twilio.com")
+- Automated deployment model using Puppet, Chef and or Ansible.
 - Use of a Logging Router
 - Use of Queuing, Caching and Configuration Services 
 - Use of Haddop to calculate statistics
-- Use of Puppet/Chef to deploy the application 
+
 
 
 ## Use Cases
