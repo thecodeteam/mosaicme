@@ -5,43 +5,49 @@ import time
 import os.path
 import shutil
 import os
-import Image
 import configparser
 
 def copySourceFile(imagename):
+    print "Copy Source File ...."
     # check if file exist under share/in
     src = "/mosaic/in/"+imagename
     dst = "/engine/tmp/"+imagename
     if(os.path.isfile(src)):
     # copy to destination process/tmp
         shutil.copyfile(src, dst)
-        print " [x] Finished copying % locally" %(imagename)
+        print " [x] Finished copying "+imagename+" locally"
         return True
     else:
         return False
 
 
 def buildTiles():
+    print "build Tiles ...."
     os.system("metapixel-prepare /mosaic/raw tiles/ --width=32 --height=32")
     print " [x] Finished building tiles"
 
 
 def createMosaic(imagename):
+    print "Create Mosaic ...."
     src = "/engine/tmp/"+imagename
     out = "/engine/tmp/mosaic-"+imagename
-    os.system("metapixel --metapixel "+src+" "+out+" --library destination --scale=10 --distance=5")
+    dest="/engine/tiles/"
+    os.system("metapixel --metapixel "+src+" "+out+" --library "+dest+" --scale=10 --distance=5")
     print " [x] Finished Creating Mosaic File"
 
 
 def createThumbnails(imagename):
+    print "Create Thumbnails ...."
     global thm_size
     src = "/engine/tmp/mosaic-"+imagename
-    out = "/engine/tmp/thm_"+imagename
-    Image.open(imagename).thumbnail((thm_size,thm_size)).save(out)
+    out = "/engine/tmp/thm-"+imagename
+
+    os.system("convert -thumbnail "+str(thm_size)+" "+src+" "+out)
     print " [x] Finished Creating Mosaic File"
 
 
 def moveFiles(imagename):
+    print "Move Files...."
     src = "/engine/tmp/mosaic-"+imagename
     src2 = "/engine/tmp/thm-"+imagename
     dst = "/mosaic/out/large/mosaic-"+imagename
@@ -58,6 +64,7 @@ def moveFiles(imagename):
 
 
 def putMsg(imagename):
+    print "Put Msg ...."
     global hostname
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
     channel = connection.channel()
@@ -73,10 +80,14 @@ def putMsg(imagename):
 
     print " [x] Finished Putting Msg"
 
+print "Read setting ini"
 config = configparser.ConfigParser()
 config.read('engine.ini')
 hostname =config['DEFAULT']['hostname']
 thm_size =config['DEFAULT']['thm_size']
+print "Host "+hostname
+print "thm_size"+str(thm_size)
+
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
 channel = connection.channel()
 channel.queue_declare(queue='mosaic', durable=True)
