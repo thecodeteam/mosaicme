@@ -1,0 +1,18 @@
+[submodule "puppet/modules/apt"]
+	path = puppet/modules/apt
+	url = https://github.com/puppetlabs/puppetlabs-apt
+[submodule "puppet/modules/concat"]
+	path = puppet/modules/concat
+	url = https://github.com/puppetlabs/puppetlabs-concat
+[submodule "puppet/modules/gcc"]
+	path = puppet/modules/gcc
+	url = https://github.com/puppetlabs/puppetlabs-gcc
+[submodule "puppet/modules/python"]
+	path = puppet/modules/python
+	url = https://github.com/stankevich/puppet-python
+[submodule "puppet/modules/stdlib"]
+	path = puppet/modules/stdlib
+	url = https://github.com/puppetlabs/puppetlabs-stdlib
+[submodule "puppet/modules/wget"]
+	path = puppet/modules/wget
+	url = https://github.com/maestrodev/puppet-wget
