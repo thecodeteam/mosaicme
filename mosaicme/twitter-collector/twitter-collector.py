@@ -4,6 +4,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+import logging
 import dotenv
 import os
 import sys
@@ -16,7 +17,8 @@ try:
     consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
     access_token = os.environ['TWITTER_ACCESS_TOKEN']
     access_token_secret = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
-except:
+except KeyError, e:
+    logging.error('Could not obtain environment variable: %s', str(e))
     sys.exit(1)
 
 
