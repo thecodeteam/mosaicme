@@ -11,10 +11,10 @@ import dotenv
 import os
 import sys
 
-logging.config.fileConfig('../logging.conf')
-logger = logging.getLogger('twitterCollector')
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
+logger = logging.getLogger('twitterCollector')
 dotenv.read_dotenv(os.path.join(BASE_DIR, '..', '.env'))
 
 try:
@@ -67,3 +67,6 @@ if __name__ == '__main__':
 
     stream = Stream(auth, l)
     stream.filter(track=['#felizmiercoles'])
+
+
+
