@@ -4,6 +4,8 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+from uploader import upload_picture
+
 import json
 import logging
 import logging.config
@@ -54,6 +56,8 @@ class MosaicmeListener(StreamListener):
             media_url = media['media_url']
             media_id = media['id_str']
             logger.info('Media found. ID: %s - URL: %s', media_id, media_url)
+
+            upload_picture.delay(media_id, media_url)
         return True
 
     def on_error(self, status):
