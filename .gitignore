@@ -53,3 +53,9 @@ docs/_build/
 # PyBuilder
 target/
 *.~vsd
+
+# Vagrant
+.vagrant/
+
+# dotenv
+.env
