@@ -4,7 +4,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-from uploader import upload_picture
+from tasks import upload_picture
 
 import json
 import logging
@@ -35,8 +35,6 @@ class MosaicmeListener(StreamListener):
     gets the pictures
     """
     def on_data(self, str_data):
-        # print(str_data)
-
         try:
             data = json.loads(str_data)
         except ValueError, e:
@@ -44,24 +42,23 @@ class MosaicmeListener(StreamListener):
             return True
 
         if 'extended_entities' not in data:
-            logger.info('No extended entities found')
+            logger.debug('No extended entities found')
             return True
         if 'media' not in data['extended_entities']:
-            logger.info('No media found')
+            logger.debug('No media found')
         if not data['extended_entities']['media']:
-            logger.info('No media found')
+            logger.debug('No media found')
         for media in data['extended_entities']['media']:
             if media['type'] != 'photo':
                 pass
             media_url = media['media_url']
             media_id = media['id_str']
             logger.info('Media found. ID: %s - URL: %s', media_id, media_url)
-
             upload_picture.delay(media_id, media_url)
         return True
 
     def on_error(self, status):
-        print(status)
+        logger.error('Error from the Twitter feed: %s', status)
 
 
 if __name__ == '__main__':
@@ -70,7 +67,7 @@ if __name__ == '__main__':
     auth.set_access_token(access_token, access_token_secret)
 
     stream = Stream(auth, l)
-    stream.filter(track=['#felizmiercoles'])
+    stream.filter(track=['#FelizJueves'])
 
 
 
