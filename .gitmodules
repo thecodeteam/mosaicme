@@ -16,3 +16,6 @@
 [submodule "puppet/modules/wget"]
 	path = puppet/modules/wget
 	url = https://github.com/maestrodev/puppet-wget
+[submodule "puppet/modules/redis"]
+	path = puppet/modules/redis
+	url = https://github.com/thomasvandoren/puppet-redis

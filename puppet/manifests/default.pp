@@ -29,3 +29,5 @@ class { 'python' :
   }
 
 python::requirements { '/tmp/requirements.txt': }
+
+include redis
