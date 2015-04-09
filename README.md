@@ -58,10 +58,8 @@ The following has an overview of each one of the components:
 Component Name              |	Component Description
 --------------------------- | ---------------------|
 Web Interface               | Web Interface to for displaying pictures, mosaics, statistics and system configuration. 
-Orchestration API service   | API service that orchestrates interactions with all services in the application. 
 Mosaic processing service   | Mosaic processing service. Takes the mosaic generation request from the Orchestration API and generates the mosaic data and meta data.
 Queuing Service				| Service to host the queues required by the system.
-Configuration Service       | Service to maintain configuration, synchronization and naming registry.
 Twitter retrieval service   | Service that retrieves pictures and their meta data from the selected twitter accounts and adds them Object store.
 
 
@@ -72,7 +70,8 @@ Component Name              |	Component Description
 Statistics Service			| Haddop Cluster that takes the data in the Object Store and processes the statistics. Stores the data back to the Object store using HDFS.
 Caching Service             | Data caching service to speed the application.
 Log Routing Service		    | Service to route all services logs to the Object Store.
-
+Orchestration API service   | API service that orchestrates interactions with all services in the application. 
+Configuration Service       | Service to maintain configuration, synchronization and naming registry.
 
 
 ### Component 1 
