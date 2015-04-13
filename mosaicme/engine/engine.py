@@ -90,7 +90,7 @@ print "thm_size"+str(thm_size)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
 channel = connection.channel()
-channel.queue_declare(queue='mosaic', durable=True)
+channel.queue_declare(queue='mosaic-eng', durable=True)
 print ' [*] Waiting for messages. To exit press CTRL+C'
 def callback(ch, method, properties, body):
         print " [x] Received %r" % (body,)
