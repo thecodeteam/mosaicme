@@ -4,7 +4,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-from mosaicme.async.tasks import upload_source_image
+from mosaicme.async.tasks import upload_base_image
 
 import json
 import logging
@@ -16,7 +16,7 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
-logger = logging.getLogger('twitterCollector')
+logger = logging.getLogger('twitterMosaicme')
 dotenv.read_dotenv(os.path.join(BASE_DIR, '..', '.env'))
 
 try:
@@ -54,7 +54,7 @@ class MosaicmeListener(StreamListener):
             media_url = media['media_url']
             media_id = media['id_str']
             logger.info('Media found. ID: %s - URL: %s', media_id, media_url)
-            upload_source_image.delay(media_id, media_url)
+            upload_base_image.delay(media_id, media_url)
         return True
 
     def on_error(self, status):
