@@ -18,7 +18,7 @@ public class syncengine {
         {
             System.out.print("Enter Option Number: ");
             String key = new BufferedReader(new InputStreamReader(System.in)).readLine();
-            if (key == "1" || key == "2" || key == "3" || key == "4" || key == "5") {
+            if (key.equals("1") || key.equals("2") || key.equals("3") || key.equals("4") || key.equals("5")) {
                 int n = Integer.parseInt(key);
 
                 switch (n) {
