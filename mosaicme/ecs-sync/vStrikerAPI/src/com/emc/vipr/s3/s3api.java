@@ -24,6 +24,17 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.emc.vipr.services.s3.ViPRS3Client;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
+import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
+import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
+import com.amazonaws.services.s3.model.PartETag;
+import com.amazonaws.services.s3.model.UploadPartRequest;
 
 public class s3api {
 
@@ -109,10 +120,77 @@ public class s3api {
 		ViPRS3Client s3 = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
 				S3_ENDPOINT, S3_ViPR_NAMESPACE);
 		// create the object in the demo bucket
-		System.out.println("client:"+s3.getServiceName());
-		s3.putObject(S3_BUCKET, key, content, null);
+
+
+			s3.putObject(S3_BUCKET, key, content, null);
+		}
+
+
+
+
+
+
+
+
+	public static void CreateLargeObject(String S3_ACCESS_KEY_ID,
+									String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,
+									String S3_BUCKET, String key, File file) throws Exception {
+
+		System.out.println("Access ID:"+S3_ACCESS_KEY_ID);
+		System.out.println("Access secret:"+S3_SECRET_KEY);
+		System.out.println("Access URL:"+S3_ENDPOINT);
+		System.out.println("Access namespace:"+S3_ViPR_NAMESPACE);
+		System.out.println("Access bucket:"+S3_BUCKET);
+		System.out.println("Access key:"+key);
+
+		ViPRS3Client s3 = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
+				S3_ENDPOINT, S3_ViPR_NAMESPACE);
+
+			InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(S3_BUCKET, key);
+			InitiateMultipartUploadResult initResponse =s3.initiateMultipartUpload(initRequest);
+			long partSize = 1 * 1024 * 1024; // Set part size to 1 MB.
+			// list of UploadPartResponse objects for each part that is uploaded
+			List<PartETag> partETags = new ArrayList<PartETag>();
+			long filePosition = 0;
+			for (int i = 1; filePosition < file.length(); i++) {
+				// get the size of the chunk.  Note - the last part can be less than the chunk size
+				partSize = Math.min(partSize, (file.length() - filePosition));
+
+				System.out.println( String.format("Sending chunk [%d] starting at position [%d]", i, filePosition));
+
+				// Create request to upload a part.
+				UploadPartRequest uploadRequest = new UploadPartRequest()
+						.withBucketName(S3_BUCKET).withKey(key)
+						.withUploadId(initResponse.getUploadId()).withPartNumber(i)
+						.withFileOffset(filePosition)
+						.withFile(file)
+						.withPartSize(partSize);
+
+				// Upload part and add response to our list.
+				PartETag eTagPart = s3.uploadPart(uploadRequest).getPartETag();
+				partETags.add(eTagPart);
+
+				// set file position to the next part in the file
+				filePosition += partSize;
+			}
+			System.out.println("Waiting for completion of multi-part upload");
+			CompleteMultipartUploadRequest compRequest = new
+					CompleteMultipartUploadRequest(S3_BUCKET,
+					key,
+					initResponse.getUploadId(),
+					partETags);
+
+			s3.completeMultipartUpload(compRequest);
+
+
+
 
 	}
+
+
+
+
+
 
 	public static void UpdateObject(String S3_ACCESS_KEY_ID,
 			String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,

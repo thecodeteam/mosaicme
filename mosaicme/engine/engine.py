@@ -112,7 +112,7 @@ def callback(ch, method, properties, body):
 
 channel.basic_qos(prefetch_count=1)
 channel.basic_consume(callback,
-                      queue='mosaic')
+                      queue='mosaic-eng')
 
 channel.start_consuming()
 

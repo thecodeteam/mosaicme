@@ -102,13 +102,16 @@ public class mosaicMeUploader  extends Thread{
             String largeimage="mosaic-"+image;
             String smallimage="thm-"+image;
 
+
             FileInputStream fis2 = new FileInputStream(filesmall);
             s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_SMALL_BUCKET,smallimage, fis2);
 
             putMessge(image);
 
             FileInputStream fis = new FileInputStream(filelarge);
-            s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_LARGE_BUCKET,largeimage, fis);
+            File f = new File(filelarge);
+
+            s3api.CreateLargeObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_LARGE_BUCKET,largeimage, f);
 
 
              putMessge(image);
