@@ -68,9 +68,9 @@ def putMsg(imagename):
     global hostname
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
     channel = connection.channel()
-    channel.queue_declare(queue='mosaic-done', durable=True)
+    channel.queue_declare(queue='mosaic-finish', durable=True)
     channel.basic_publish(exchange='',
-                          routing_key='mosaic-done',
+                          routing_key='mosaic-finish',
                           body=imagename,
                           properties=pika.BasicProperties(
                              delivery_mode = 2, # make message persistent
