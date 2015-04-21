@@ -43,7 +43,8 @@ public class mosaicMeDownloader  extends Thread{
             S3_ACCESS_KEY_ID = prop.getProperty("username");
             S3_SECRET_KEY = prop.getProperty("password");
             S3_ENDPOINT = prop.getProperty("proxy");
-            S3_BUCKET = prop.getProperty("emcbucket");
+            S3_BUCKET = prop.getProperty("inbucket");
+
             LOCAL_DIR = prop.getProperty("emclocal");
             DOWNLOAD_QUEUE_NAME = prop.getProperty("downloaderQueue");
             ENGINE_QUEUE_NAME = prop.getProperty("engineQueue");
