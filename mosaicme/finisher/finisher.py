@@ -1,7 +1,7 @@
 import logging
 import logging.config
 import os
-import redis
+import pika
 import threading
 import dotenv
 import sys
@@ -18,51 +18,54 @@ try:
     consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
     access_token = os.environ['TWITTER_ACCESS_TOKEN']
     access_token_secret = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
+
+    rmq_host = os.environ['RABBITMQ_HOST']
+    rmq_port = int(os.environ['RABBITMQ_PORT'])
+    rmq_user = os.environ['RABBITMQ_USER']
+    rmq_password = os.environ['RABBITMQ_PASSWORD']
+    listen_queue = os.environ['QUEUE_DONE']
 except KeyError, e:
     logger.error('Could not obtain environment variable: %s', str(e))
     sys.exit(1)
 
 
-class Listener(threading.Thread):
 
-    def __init__(self, r, channels):
-        threading.Thread.__init__(self)
-        self.redis = r
-        self.pubsub = self.redis.pubsub()
-        self.pubsub.subscribe(channels)
-        # tweepy init
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        auth.set_access_token(access_token, access_token_secret)
-        self.api = tweepy.API(auth)
+# tweepy init
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_token, access_token_secret)
+api = tweepy.API(auth)
 
-    def work(self, item):
-        # TODO: 1. check if the message complies with the protocol
-        # TODO: 2. get the mosaic URI
-        # TODO: 3. upload the mosaic to the object store and get the public URL (large and small)
-        # TODO: 4. tweet out the mosaic with the URL
+# rabbitmq init
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    host=rmq_host, port=rmq_port, credentials=pika.PlainCredentials(rmq_user, rmq_password)))
+channel = connection.channel()
 
-        # ignore subscribe messages
-        if item['type'] == 'subscribe':
-            return
+channel.exchange_declare(exchange=listen_queue,
+                         type='fanout')
 
-        print item['channel'], ":", item['data']
-        try:
-            status = self.api.update_status(status=item['data'])
-            print status
-            logger.info('Mosaic was tweeted out successfully!')
-        except Exception as inst:
-            logger.error('There was an error sending out the tweet: ', inst)
+result = channel.queue_declare(exclusive=True)
+queue_name = result.method.queue
 
-    def run(self):
-        for item in self.pubsub.listen():
-            if item['data'] == "KILL":
-                self.pubsub.unsubscribe()
-                print self, "unsubscribed and finished"
-                break
-            else:
-                self.work(item)
+channel.queue_bind(exchange=listen_queue,
+                   queue=queue_name)
+
+print ' [*] Waiting for logs. To exit press CTRL+C'
 
 
-if __name__ == "__main__":
-    client = Listener(redis.Redis(), ['mosaic-finish'])
-    client.start()
+def callback(ch, method, properties, body):
+    # TODO: 1. check if the message complies with the protocol
+    # TODO: 2. tweet out the mosaic with the URL
+    print " [x] %r" % (body,)
+    try:
+        status = api.update_status(status=body)
+        print status
+        logger.info('Mosaic was tweeted out successfully!')
+    except Exception as inst:
+        logger.error('There was an error sending out the tweet: ', inst)
+
+
+channel.basic_consume(callback,
+                      queue=queue_name,
+                      no_ack=True)
+
+channel.start_consuming()
