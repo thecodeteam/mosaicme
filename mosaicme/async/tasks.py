@@ -37,7 +37,7 @@ try:
 except:
     is_secure = False
 bucket_collector = os.environ['BUCKET_COLLECTOR']
-bucket_mosaic_in = os.environ['BUCKET_MOSAIC_IN']
+bucket_mosaic_in = os.environ['BUCKET_IN']
 
 
 @app.task
