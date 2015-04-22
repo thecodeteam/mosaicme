@@ -49,10 +49,11 @@ public class emcWorldDownloader  extends Thread{
 
                     for (S3ObjectSummary obj :
                             list.getObjectSummaries()) {
-                        System.out.println("Downloading - " + obj.getKey());
+
 
 
                         if (!(new File(LOCAL_DIR, obj.getKey()).exists())) {
+                            System.out.println("Downloading - " + obj.getKey());
                             S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
                                     S3_SECRET_KEY, S3_ENDPOINT, null,
                                     S3_BUCKET, obj.getKey());
@@ -71,6 +72,10 @@ public class emcWorldDownloader  extends Thread{
                             }
                             out.close();
                             in.close();
+                        }
+                        else
+                        {
+                            System.out.println("skipping - " + obj.getKey());
                         }
                     }
                 }
