@@ -3,6 +3,7 @@
  */
 
 import java.io.*;
+import java.net.URL;
 import java.util.Properties;
 import java.util.Date;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -12,6 +13,12 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.MessageProperties;
+
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 
 public class mosaicMeUploader  extends Thread{
     public String DONE_QUEUE_NAME = "";
@@ -106,15 +113,36 @@ public class mosaicMeUploader  extends Thread{
             FileInputStream fis2 = new FileInputStream(filesmall);
             s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_SMALL_BUCKET,smallimage, fis2);
 
-            putMessge(image);
+
+
+            java.util.Date expiration = new java.util.Date();
+            long milliSeconds = expiration.getTime();
+            milliSeconds += 1000 * 60 * 60*24*365; // Add 1 hour.
+            expiration.setTime(milliSeconds);
+
+            GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                    new GeneratePresignedUrlRequest(MOSAIC_OUT_SMALL_BUCKET, smallimage);
+            generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+            generatePresignedUrlRequest.setExpiration(expiration);
+
+            URL smallurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
+
+
+            putMessge(smallurl.toString());
 
             FileInputStream fis = new FileInputStream(filelarge);
             File f = new File(filelarge);
 
             s3api.CreateLargeObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_LARGE_BUCKET,largeimage, f);
 
+            generatePresignedUrlRequest =
+                    new GeneratePresignedUrlRequest(MOSAIC_OUT_LARGE_BUCKET, largeimage);
+            generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+            generatePresignedUrlRequest.setExpiration(expiration);
 
-             putMessge(image);
+            URL largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
+
+             putMessge(largeurl.toString());
 
             //Delete Files
             if(!(new File(filelarge).delete()))

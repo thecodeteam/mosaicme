@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 package com.emc.vipr.s3;
-
+import java.net.URL;
 import java.io.InputStream;
 import java.util.List;
 
@@ -23,6 +23,14 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+
 import com.emc.vipr.services.s3.ViPRS3Client;
 import java.io.BufferedReader;
 import java.io.File;
@@ -227,4 +235,11 @@ public class s3api {
 
 	}
 
+	public static URL generatePresignedUrl(String S3_ACCESS_KEY_ID,
+										   String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,GeneratePresignedUrlRequest  generatePresignedUrlRequest)
+	{
+		ViPRS3Client s3client = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
+				S3_ENDPOINT, S3_ViPR_NAMESPACE);
+		return s3client.generatePresignedUrl(generatePresignedUrlRequest);
+	}
 }

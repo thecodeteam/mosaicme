@@ -49,29 +49,29 @@ public class emcWorldDownloader  extends Thread{
 
                     for (S3ObjectSummary obj :
                             list.getObjectSummaries()) {
-                        System.out.println("Downloading - " + obj.getKey() );
+                        System.out.println("Downloading - " + obj.getKey());
 
 
-                        S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
-                                S3_SECRET_KEY, S3_ENDPOINT, null,
-                                S3_BUCKET,  obj.getKey());
+                        if (!(new File(LOCAL_DIR, obj.getKey()).exists())) {
+                            S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
+                                    S3_SECRET_KEY, S3_ENDPOINT, null,
+                                    S3_BUCKET, obj.getKey());
 
 
-                        File file = new File(LOCAL_DIR+obj.getKey());
+                            File file = new File(LOCAL_DIR + obj.getKey());
 
-                        int count=0;
-                        byte[] buf = new byte[1024];
-                        OutputStream out = new FileOutputStream(file);
-                        while( (count = in.read(buf)) != -1)
-                        {
-                            if( Thread.interrupted() )
-                            {
-                                throw new InterruptedException();
+                            int count = 0;
+                            byte[] buf = new byte[1024];
+                            OutputStream out = new FileOutputStream(file);
+                            while ((count = in.read(buf)) != -1) {
+                                if (Thread.interrupted()) {
+                                    throw new InterruptedException();
+                                }
+                                out.write(buf, 0, count);
                             }
-                            out.write(buf, 0, count);
+                            out.close();
+                            in.close();
                         }
-                        out.close();
-                        in.close();
                     }
                 }
                 else
