@@ -34,6 +34,9 @@ public class mosaicMeUploader  extends Thread{
 
     public String MOSAIC_OUT_LARGE_BUCKET = "";
     public String MOSAIC_OUT_SMALL_BUCKET = "";
+
+    public String TWITTER_TEXT = "";
+    public String TWITTER_TAG = "";
     public void run() {
         try {
 
@@ -67,6 +70,8 @@ public class mosaicMeUploader  extends Thread{
 
             MOSAIC_OUT_LARGE_BUCKET = prop.getProperty("outlargebucket");
             MOSAIC_OUT_SMALL_BUCKET = prop.getProperty("outsmallbucket");
+            TWITTER_TEXT = prop.getProperty("twitterText");
+            TWITTER_TAG =  prop.getProperty("twitterhashtage");
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(QUEUE_HOST_NAME);
@@ -86,7 +91,7 @@ public class mosaicMeUploader  extends Thread{
                 String message = new String(delivery.getBody());
 
                 System.out.println(" [x] Received '" + message + "'");
-                UploadImage(message);
+                uploadImage(message);
                 System.out.println(" [x] Done -" + (new Date()).toString());
 
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
@@ -100,7 +105,7 @@ public class mosaicMeUploader  extends Thread{
         }
     }
 
-    public void UploadImage(String image) {
+    public void uploadImage(String image) {
         try {
             System.out.println(" Download Image '" + image + "'");
 
@@ -128,7 +133,7 @@ public class mosaicMeUploader  extends Thread{
             URL smallurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
 
 
-            putMessge(smallurl.toString());
+
 
             FileInputStream fis = new FileInputStream(filelarge);
             File f = new File(filelarge);
@@ -142,7 +147,9 @@ public class mosaicMeUploader  extends Thread{
 
             URL largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
 
-             putMessge(largeurl.toString());
+            String twitter= createTwitter(smallurl.toString(),largeurl.toString());
+
+            putMessge(twitter);
 
             //Delete Files
             if(!(new File(filelarge).delete()))
@@ -161,7 +168,7 @@ public class mosaicMeUploader  extends Thread{
 
     }
 
-    public void  putMessge(String image) throws Exception
+    public void  putMessge(String msg) throws Exception
     {
         System.out.println(" Put Message on Q '" + FINISHED_QUEUE_NAME + "'");
 
@@ -176,10 +183,17 @@ public class mosaicMeUploader  extends Thread{
 
         channel.basicPublish( "", FINISHED_QUEUE_NAME,
                 MessageProperties.PERSISTENT_TEXT_PLAIN,
-                image.getBytes());
-        System.out.println(" [x] Sent '" + image + "'");
+                msg.getBytes());
+        System.out.println(" [x] Sent '" + msg + "'");
 
         channel.close();
         connection.close();
     }
+
+    public String createTwitter(String smallurl, String largeurl)
+    {
+        String twitter="\"body\":\""+TWITTER_TEXT+"\",\"twitter_entities\":{\"hashtags\": [{\"text\": \""+TWITTER_TAG+"\"} ],\"urls\": [{\"url\": \""+largeurl+"\" }],\"media\": [{\"url\": \""+smallurl+"\",\"type\": \"photo\",}]";
+        return twitter;
+    }
+
 }
