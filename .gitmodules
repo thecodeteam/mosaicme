@@ -19,3 +19,12 @@
 [submodule "puppet/modules/redis"]
 	path = puppet/modules/redis
 	url = https://github.com/thomasvandoren/puppet-redis
+[submodule "puppet/modules/java"]
+	path = puppet/modules/java
+	url = https://github.com/puppetlabs/puppetlabs-java
+[submodule "puppet/modules/rabbitmq"]
+	path = puppet/modules/rabbitmq
+	url = https://github.com/puppetlabs/puppetlabs-rabbitmq
+[submodule "puppet/modules/staging"]
+	path = puppet/modules/staging
+	url = https://github.com/nanliu/puppet-staging

@@ -15,7 +15,7 @@ package { ['python-software-properties']:
   require => Exec['apt-get update'],
 }
 
-$sysPackages = ['git', 'curl']
+$sysPackages = ['git', 'curl', 'metapixel']
 package { $sysPackages:
   ensure => "installed",
   require => Exec['apt-get update'],
@@ -29,5 +29,13 @@ class { 'python' :
   }
 
 python::requirements { '/tmp/requirements.txt': }
+
+class { 'java':
+  distribution => 'jre',
+}
+
+class { '::rabbitmq':
+  port              => '5672',
+}
 
 include redis
