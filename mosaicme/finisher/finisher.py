@@ -40,14 +40,7 @@ connection = pika.BlockingConnection(pika.ConnectionParameters(
     host=rmq_host, port=rmq_port, credentials=pika.PlainCredentials(rmq_user, rmq_password)))
 channel = connection.channel()
 
-channel.exchange_declare(exchange=listen_queue,
-                         type='fanout')
-
-result = channel.queue_declare(exclusive=True)
-queue_name = result.method.queue
-
-channel.queue_bind(exchange=listen_queue,
-                   queue=queue_name)
+channel.queue_declare(queue=listen_queue, durable=True)
 
 print ' [*] Waiting for logs. To exit press CTRL+C'
 
@@ -65,7 +58,7 @@ def callback(ch, method, properties, body):
 
 
 channel.basic_consume(callback,
-                      queue=queue_name,
+                      queue=listen_queue,
                       no_ack=True)
 
 channel.start_consuming()
