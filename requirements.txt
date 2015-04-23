@@ -5,3 +5,4 @@ celery==3.1.17
 redis==2.10.3
 requests==2.6.0
 boto==2.37.0
+supervisor==3.1.3
