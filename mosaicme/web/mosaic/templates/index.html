@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 <!DOCTYPE html>
-<html>
+<html ng-app="mosaicmeApp">
 <head lang="en">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -16,21 +16,23 @@
     <link href='http://fonts.googleapis.com/css?family=Raleway:700,400' rel='stylesheet' type='text/css'>
 
 {#    {% bootstrap_javascript %}#}
+    <script src="{% static 'js/angular.min.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/tiksluscarousel.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
 
     <title></title>
 </head>
-<body>
+<body ng-controller="MosaicMeCtrl">
       <div id="content-wrapper">
         <h1>EMC CODE</h1>
           <div id="carouselWidth">
             <div id="carousel1">
               <ul>
-                {% for image_url in images %}
-                    <li><img src="{{ image_url }}"></li>
-                {% endfor %}
+
+                    <li ng-repeat="image in images"><img src="{% verbatim %}{{ image.url }}{% endverbatim %}"></li>
+
               </ul>
             </div>
             <p>

@@ -7,19 +7,19 @@ from django.views.generic import View
 
 
 def index(request):
+    #
+    # images = []
+    # images.append('http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg')
+    # images.append('https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg')
+    # images.append('https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg')
+    # images.append('https://i.vimeocdn.com/video/437533496_640.jpg')
+    # images.append('https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg')
+    # images.append('http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg')
+    #
+    # data = dict()
+    # data['images'] = images
 
-    images = []
-    images.append('http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg')
-    images.append('https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg')
-    images.append('https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg')
-    images.append('https://i.vimeocdn.com/video/437533496_640.jpg')
-    images.append('https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg')
-    images.append('http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg')
-
-    data = dict()
-    data['images'] = images
-
-    return render(request, 'index.html', data)
+    return render(request, 'index.html')
 
 
 class MosaicView(View):
