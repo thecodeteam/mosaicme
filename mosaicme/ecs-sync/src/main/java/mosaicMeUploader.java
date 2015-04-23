@@ -13,7 +13,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.MessageProperties;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
@@ -22,6 +21,8 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import javafx.scene.control.Hyperlink;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
+import com.rosaloves.bitlyj.*;
+import static com.rosaloves.bitlyj.Bitly.*;
 
 
 public class mosaicMeUploader  extends Thread{
@@ -45,6 +46,9 @@ public class mosaicMeUploader  extends Thread{
     public String CONSUMER_SECRET = "";
     public String ACCESS_TOKEN = "";
     public String ACCESS_TOKEN_SECRET = "";
+
+    public String BIT_LY_LOGIN = "";
+    public String BIT_LY_KEY_API = "";
 
     public void run() {
         try {
@@ -87,6 +91,8 @@ public class mosaicMeUploader  extends Thread{
             ACCESS_TOKEN = prop.getProperty("accessToken");;
             ACCESS_TOKEN_SECRET = prop.getProperty("accessTokenSecret");;
 
+            BIT_LY_KEY_API=prop.getProperty("bitlyapikey");
+            BIT_LY_LOGIN=prop.getProperty("bitlylogin");
 
 
             ConnectionFactory factory = new ConnectionFactory();
@@ -182,7 +188,7 @@ public class mosaicMeUploader  extends Thread{
 
     }
 
-    public void  putMessge(String smallurl,String largeurl) throws Exception
+    public void  putMessge(String smallurl,String largeurl)
     {
         try {
             System.out.println(" Put Message on twitter");
@@ -202,7 +208,7 @@ public class mosaicMeUploader  extends Thread{
             //Instantiate and initialize a new twitter status update
             //String msg="http://10.243.188.101:10101/mosaic-outlarge/mosaic-penguins.jpg?Signature=vNXXsGWjFRIxFqssKYB1hqXHqv4%3D&AWSAccessKeyId=wuser1%40sanity.local&Expires=1431224053";
 
-            StatusUpdate statusUpdate = new StatusUpdate(TWITTER_TEXT);
+            StatusUpdate statusUpdate = new StatusUpdate(TWITTER_TEXT+" - "+shortenURL(largeurl));
             //attach any media, if you want to
             statusUpdate.setMedia("", new URL(smallurl).openStream());
             Status status = twitter.updateStatus(statusUpdate);
@@ -215,5 +221,12 @@ public class mosaicMeUploader  extends Thread{
 
     }
 
+    public String shortenURL(String largeurl) throws Exception {
 
+        Provider bitly = Bitly.as(BIT_LY_LOGIN, BIT_LY_KEY_API);
+        ShortenedUrl info =bitly.call(shorten(largeurl));
+        System.out.println("Shorten URL "+info.getShortUrl());
+        return info.getShortUrl();
+
+    }
 }
