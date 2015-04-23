@@ -30,9 +30,7 @@
           <div id="carouselWidth">
             <div id="carousel1">
               <ul>
-
-                    <li ng-repeat="image in images"><img src="{% verbatim %}{{ image.url }}{% endverbatim %}"></li>
-
+                <li ng-repeat="image in images">{% verbatim %}<img ng-src="{{ image.url }}">{% endverbatim %}</li>
               </ul>
             </div>
             <p>

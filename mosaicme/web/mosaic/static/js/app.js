@@ -1,5 +1,5 @@
 
-var mosaicmeApp = angular.module('phonecatApp', []).config(function($httpProvider) {
+var mosaicmeApp = angular.module('mosaicmeApp', []).config(function($httpProvider) {
 
     $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
