@@ -1,17 +1,15 @@
 from __future__ import absolute_import
 
-from celery import Celery
-
-import boto
-from boto.s3.connection import S3Connection
-
 import logging
 import logging.config
 import os
-import dotenv
-import requests
 import shutil
-import json
+
+from celery import Celery
+import boto
+from boto.s3.connection import S3Connection
+import pika
+import requests
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -19,105 +17,68 @@ TMP_DIR = os.path.join(BASE_DIR, '.imgtmp')
 if not os.path.exists(TMP_DIR):
     os.makedirs(TMP_DIR)
 logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
-logger = logging.getLogger('twitterCollector')
-dotenv.read_dotenv(os.path.join(BASE_DIR, '..', '.env'))
+logger = logging.getLogger(__name__)
 
 app = Celery('twitterCollector')
 app.config_from_object('mosaicme.celeryconfig')
 
-accessKeyId = os.environ['S3_ACCESS_KEY']
-secretKey = os.environ['S3_SECRET_KEY']
-host = os.environ['S3_HOST']
-try:
-    port = int(os.environ['S3_PORT'])
-except:
-    port = 80
-try:
-    is_secure = json.loads(os.environ['S3_HTTPS'].lower())
-except:
-    is_secure = False
-bucket_collector = os.environ['BUCKET_COLLECTOR']
-bucket_mosaic_in = os.environ['BUCKET_IN']
-
 
 @app.task
-def upload_source_image(img_id, url):
+def upload_image(img_id, url, bucket, s3_credentials, rmq_credentials, queue=None):
     logger.debug('Downloading picture (ID: %s, URL: %s)', img_id, url)
     r = requests.get(url, stream=True)
     if r.status_code != 200:
         logger.debug('Could not download picture (ID: %s, URL: %s)', img_id, url)
         return False
 
-    pic_name = '{name}.{extension}'.format(name=img_id, extension='jpg')
-    path = os.path.join(TMP_DIR, pic_name)
+    img_name = '{name}.{extension}'.format(name=img_id, extension='jpg')
+    path = os.path.join(TMP_DIR, img_name)
     with open(path, 'wb') as f:
         r.raw.decode_content = True
         shutil.copyfileobj(r.raw, f)
     logger.debug('Picture downloaded successfuly into %s (ID: %s, URL: %s)', path, img_id, url)
     logger.debug('Uploading picture to object store (ID: %s)', img_id)
-    conn = S3Connection(aws_access_key_id=accessKeyId,
-                        aws_secret_access_key=secretKey,
-                        host=host,
-                        port=port,
+
+    conn = S3Connection(aws_access_key_id=s3_credentials['access_key'],
+                        aws_secret_access_key=s3_credentials['secret_key'],
+                        host=s3_credentials['host'],
+                        port=s3_credentials['port'],
                         calling_format='boto.s3.connection.ProtocolIndependentOrdinaryCallingFormat',
-                        is_secure=is_secure)
+                        is_secure=s3_credentials['is_secure'])
     try:
-        bucket = conn.get_bucket(bucket_collector)
+        bucket = conn.get_bucket(bucket)
     except boto.exception.S3ResponseError:
-        logger.error("Couldn't obtain bucket: %s", bucket_collector)
+        logger.error("Couldn't obtain bucket: %s", bucket)
         return False
 
-    key = bucket.get_key(pic_name, validate=False)
+    key = bucket.get_key(img_name, validate=False)
     try:
         key.set_contents_from_filename(path)
     except:
-        logger.error("Couldn't upload file %s to bucket %s", path, bucket_collector)
+        logger.error("Couldn't upload file %s to bucket %s", path, bucket)
         return False
     logger.info('Image uploaded successfully to object store (ID: %s)', img_id)
 
-    try:
-        os.remove(path)
-        logger.debug('Removed temporary file at %s', path)
-    except OSError:
-        pass
-    return True
+    if queue:
+        logger.info('Sending message to queue "%s" (ID: %s)', queue, img_id)
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(
+                host=rmq_credentials['host'], port=rmq_credentials['port'],
+                credentials=pika.PlainCredentials(rmq_credentials['user'], rmq_credentials['password'])))
 
-
-
-@app.task
-def upload_base_image(img_id, url):
-    logger.debug('Downloading base image (ID: %s, URL: %s)', img_id, url)
-    r = requests.get(url, stream=True)
-    if r.status_code != 200:
-        logger.debug('Could not base picture (ID: %s, URL: %s)', img_id, url)
-        return False
-
-    pic_name = '{name}.{extension}'.format(name=img_id, extension='jpg')
-    path = os.path.join(TMP_DIR, pic_name)
-    with open(path, 'wb') as f:
-        r.raw.decode_content = True
-        shutil.copyfileobj(r.raw, f)
-    logger.debug('Picture downloaded successfuly into %s (ID: %s, URL: %s)', path, img_id, url)
-    logger.debug('Uploading picture to object store (ID: %s)', img_id)
-    conn = S3Connection(aws_access_key_id=accessKeyId,
-                        aws_secret_access_key=secretKey,
-                        host=host,
-                        port=port,
-                        calling_format='boto.s3.connection.ProtocolIndependentOrdinaryCallingFormat',
-                        is_secure=is_secure)
-    try:
-        bucket = conn.get_bucket(bucket_mosaic_in)
-    except boto.exception.S3ResponseError:
-        logger.error("Couldn't obtain bucket: %s", bucket_mosaic_in)
-        return False
-
-    key = bucket.get_key(pic_name, validate=False)
-    try:
-        key.set_contents_from_filename(path)
-    except:
-        logger.error("Couldn't upload file %s to bucket %s", path, bucket_mosaic_in)
-        return False
-    logger.info('Picture uploaded successfully to object store (ID: %s)', img_id)
+            channel = connection.channel()
+            channel.queue_declare(queue=queue, durable=True)
+            channel.basic_publish(exchange='',
+                                  routing_key=queue,
+                                  body=img_name,
+                                  properties=pika.BasicProperties(
+                                      delivery_mode=2,  # make message persistent
+                                  ))
+            logger.info('Message sent to queue "%s" (ID: %s)', queue, img_id)
+            connection.close()
+        except Exception, e:
+            logger.error('Could not send message to RabbitMQ queue', e)
+            False
 
     try:
         os.remove(path)
