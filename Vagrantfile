@@ -6,6 +6,9 @@ Vagrant.configure(2) do |config|
 
   config.vm.hostname = "mosaicme-vm"
 
+  # Django app
+  config.vm.network "forwarded_port", guest: 8000, host: 8200
+
   config.vm.synced_folder ".", "/home/vagrant/mosaicme"
 
   config.vm.provider "virtualbox" do |vb|
