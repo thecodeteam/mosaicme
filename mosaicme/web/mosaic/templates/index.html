@@ -1,10 +1,46 @@
+{% load bootstrap3 %}
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+{#    {% bootstrap_css %}#}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/normalize.css' %}" media="screen">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}" media="screen">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tiksluscarousel.css' %}" media="screen">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:700,400' rel='stylesheet' type='text/css'>
+
+{#    {% bootstrap_javascript %}#}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/tiksluscarousel.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+
     <title></title>
 </head>
 <body>
-    asdasd
-</body>
+      <div id="content-wrapper">
+        <h1>EMC CODE</h1>
+          <div id="carouselWidth">
+            <div id="carousel1">
+              <ul>
+                {% for image_url in images %}
+                    <li><img src="{{ image_url }}"></li>
+                {% endfor %}
+              </ul>
+            </div>
+            <p>
+            </p>
+          </div>
+
+        <div id="authorText">
+            <p><strong>MosaicMe Project</strong><br>
+            <a href="http://emccode.github.io">emccode.github.io</a></p>
+        </div>
+      </div>
+    </body>
 </html>

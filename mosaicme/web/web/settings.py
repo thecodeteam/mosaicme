@@ -9,9 +9,12 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import json
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+import dotenv
+dotenv.read_dotenv(os.path.join(BASE_DIR, '..', '..', '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -36,6 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'bootstrap3',
 
     'mosaic',
 )
@@ -83,3 +88,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+S3_HOST = os.environ['S3_HOST']
+S3_PORT = int(os.environ['S3_PORT'])
+S3_ACCESS_KEY = os.environ['S3_ACCESS_KEY']
+S3_SECRET_KEY = os.environ['S3_SECRET_KEY']
+S3_HTTPS = json.loads(os.environ['S3_HTTPS'].lower())
