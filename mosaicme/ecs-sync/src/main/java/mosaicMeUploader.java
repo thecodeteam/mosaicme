@@ -19,6 +19,10 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import javafx.scene.control.Hyperlink;
+import twitter4j.*;
+import twitter4j.auth.AccessToken;
+
 
 public class mosaicMeUploader  extends Thread{
     public String DONE_QUEUE_NAME = "";
@@ -37,6 +41,11 @@ public class mosaicMeUploader  extends Thread{
 
     public String TWITTER_TEXT = "";
     public String TWITTER_TAG = "";
+    public String CONSUMER_KEY = "";
+    public String CONSUMER_SECRET = "";
+    public String ACCESS_TOKEN = "";
+    public String ACCESS_TOKEN_SECRET = "";
+
     public void run() {
         try {
 
@@ -72,6 +81,13 @@ public class mosaicMeUploader  extends Thread{
             MOSAIC_OUT_SMALL_BUCKET = prop.getProperty("outsmallbucket");
             TWITTER_TEXT = prop.getProperty("twitterText");
             TWITTER_TAG =  prop.getProperty("twitterhashtage");
+
+            CONSUMER_KEY = prop.getProperty("consumerKey");;
+            CONSUMER_SECRET = prop.getProperty("consumerSecret");;
+            ACCESS_TOKEN = prop.getProperty("accessToken");;
+            ACCESS_TOKEN_SECRET = prop.getProperty("accessTokenSecret");;
+
+
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(QUEUE_HOST_NAME);
@@ -147,15 +163,13 @@ public class mosaicMeUploader  extends Thread{
 
             URL largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
 
-            String twitter= createTwitter(smallurl.toString(),largeurl.toString());
-
-            putMessge(twitter);
+            putMessge(smallurl.toString(),largeurl.toString());
 
             //Delete Files
-            if(!(new File(filelarge).delete()))
+        //    if(!(new File(filelarge).delete()))
                 System.out.println("Can not delete file "+filelarge);
 
-            if(!(new File(filesmall).delete()))
+       //     if(!(new File(filesmall).delete()))
                 System.out.println("Can not delete file "+filesmall);
 
         } catch (
@@ -168,32 +182,38 @@ public class mosaicMeUploader  extends Thread{
 
     }
 
-    public void  putMessge(String msg) throws Exception
+    public void  putMessge(String smallurl,String largeurl) throws Exception
     {
-        System.out.println(" Put Message on Q '" + FINISHED_QUEUE_NAME + "'");
+        try {
+            System.out.println(" Put Message on twitter");
+            System.out.println(" largeURL " +largeurl);
+            //Instantiate a re-usable and thread-safe factory
+            TwitterFactory twitterFactory = new TwitterFactory();
 
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(QUEUE_HOST_NAME);
-        Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel();
+            //Instantiate a new Twitter instance
+            Twitter twitter = twitterFactory.getInstance();
 
-        channel.queueDeclare(FINISHED_QUEUE_NAME, true, false, false, null);
+            //setup OAuth Consumer Credentials
+            twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
 
+            //setup OAuth Access Token
+            twitter.setOAuthAccessToken(new AccessToken(ACCESS_TOKEN,ACCESS_TOKEN_SECRET));
 
+            //Instantiate and initialize a new twitter status update
+            //String msg="http://10.243.188.101:10101/mosaic-outlarge/mosaic-penguins.jpg?Signature=vNXXsGWjFRIxFqssKYB1hqXHqv4%3D&AWSAccessKeyId=wuser1%40sanity.local&Expires=1431224053";
 
-        channel.basicPublish( "", FINISHED_QUEUE_NAME,
-                MessageProperties.PERSISTENT_TEXT_PLAIN,
-                msg.getBytes());
-        System.out.println(" [x] Sent '" + msg + "'");
+            StatusUpdate statusUpdate = new StatusUpdate(TWITTER_TEXT);
+            //attach any media, if you want to
+            statusUpdate.setMedia("", new URL(smallurl).openStream());
+            Status status = twitter.updateStatus(statusUpdate);
 
-        channel.close();
-        connection.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
-    public String createTwitter(String smallurl, String largeurl)
-    {
-        String twitter="\"body\":\""+TWITTER_TEXT+"\",\"twitter_entities\":{\"hashtags\": [{\"text\": \""+TWITTER_TAG+"\"} ],\"urls\": [{\"url\": \""+largeurl+"\" }],\"media\": [{\"url\": \""+smallurl+"\",\"type\": \"photo\",}]";
-        return twitter;
-    }
 
 }
