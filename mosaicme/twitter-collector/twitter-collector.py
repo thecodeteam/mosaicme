@@ -9,6 +9,12 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
+import getpass
+print('Username:', getpass.getuser())
+
+import os
+print('PYTHONPATH: ', os.environ['PYTHONPATH'])
+
 from mosaicme.async.tasks import upload_image
 
 import json
@@ -156,4 +162,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

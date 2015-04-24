@@ -15,7 +15,7 @@ package { ['python-software-properties']:
   require => Exec['apt-get update'],
 }
 
-$sysPackages = ['git', 'curl', 'metapixel']
+$sysPackages = ['git', 'curl', 'metapixel', 'supervisor']
 package { $sysPackages:
   ensure => "installed",
   require => Exec['apt-get update'],
