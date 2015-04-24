@@ -36,7 +36,8 @@ class TwitterListener(StreamListener):
     gets the pictures
     """
 
-    def __init__(self, bucket, s3_credentials, rmq_credentials, queue=None):
+    def __init__(self, twitter_username, bucket, s3_credentials, rmq_credentials, queue=None):
+        self.twitter_username = twitter_username
         self.bucket = bucket
         self.queue = queue
         self.s3_credentials = s3_credentials
@@ -46,22 +47,26 @@ class TwitterListener(StreamListener):
         try:
             data = json.loads(str_data)
         except ValueError, e:
-            logger.warning('Could not parse JSON data. %s', str(e))
+            logger.warning('[Tweet] Could not parse JSON data. %s', str(e))
+            return True
+
+        if data['user']['screen_name'].lower() == self.twitter_username.lower():
+            logger.info('[Tweet] Ignoring tweet by user "%s"' % (self.twitter_username, ))
             return True
 
         if 'extended_entities' not in data:
-            logger.debug('No media found')
+            logger.debug('[Tweet] No media found')
             return True
         if 'media' not in data['extended_entities']:
-            logger.debug('No media found')
+            logger.debug('[Tweet] No media found')
         if not data['extended_entities']['media']:
-            logger.debug('No media found')
+            logger.debug('[Tweet] No media found')
         for media in data['extended_entities']['media']:
             if media['type'] != 'photo':
                 pass
             media_url = media['media_url']
             media_id = media['id_str']
-            logger.info('Media found. ID: %s - URL: %s', media_id, media_url)
+            logger.info('[Tweet] Media found. ID: %s - URL: %s', media_id, media_url)
             upload_image.delay(media_id, media_url, self.bucket, self.s3_credentials, self.rmq_credentials, queue=self.queue)
         return True
 
@@ -98,6 +103,7 @@ def main():
         twitter_consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
         twitter_access_token = os.environ['TWITTER_ACCESS_TOKEN']
         twitter_access_token_secret = os.environ['TWITTER_ACCESS_TOKEN_SECRET']
+        twitter_username = os.environ['TWITTER_USERNAME']
 
         s3_access_key = os.environ['S3_ACCESS_KEY']
         s3_secret_key = os.environ['S3_SECRET_KEY']
@@ -150,7 +156,7 @@ def main():
     rmq_credentials = {'host': rmq_host, 'port': rmq_port, 'user': rmq_user,
                        'password': rmq_password}
 
-    l = TwitterListener(args.bucket, s3_credentials, rmq_credentials, queue=args.queue)
+    l = TwitterListener(twitter_username, args.bucket, s3_credentials, rmq_credentials, queue=args.queue)
     auth = OAuthHandler(twitter_consumer_key, twitter_consumer_secret)
     auth.set_access_token(twitter_access_token, twitter_access_token_secret)
 
