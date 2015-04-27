@@ -4,70 +4,77 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 public class syncengine {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+     try {
+         vLogger.LogInfo("ecs-sync: Start up");
+         System.out.println(" Welcome to Mosaic-ECS Sync Engine");
+         System.out.println("");
+         System.out.println("1- Start EMC World Downloader Only.");
+         System.out.println("2- Start MosaicMe Downloader Only.");
+         System.out.println("3- Start MosaicMe Uploader Only.");
+         System.out.println("4- Start All");
+         System.out.println("5- Exit");
 
-        System.out.println(" Welcome to Mosaic-ECS Sync Engine");
-        System.out.println("");
-        System.out.println("1- Start EMC World Downloader Only.");
-        System.out.println("2- Start MosaicMe Downloader Only.");
-        System.out.println("3- Start MosaicMe Uploader Only.");
-        System.out.println("4- Start All");
-        System.out.println("5- Exit");
+         while (true) {
+             System.out.print("Enter Option Number: ");
+             String key = new BufferedReader(new InputStreamReader(System.in)).readLine();
+             vLogger.LogInfo("ecs-sync: User select " + key);
+             if (key.equals("1") || key.equals("2") || key.equals("3") || key.equals("4") || key.equals("5")) {
+                 int n = Integer.parseInt(key);
 
-        while(true)
-        {
-            System.out.print("Enter Option Number: ");
-            String key = new BufferedReader(new InputStreamReader(System.in)).readLine();
-            if (key.equals("1") || key.equals("2") || key.equals("3") || key.equals("4") || key.equals("5")) {
-                int n = Integer.parseInt(key);
+                 switch (n) {
+                     case 1: {
 
-                switch (n) {
-                    case 1: {
+                         emcWorldDownloader downloader = new emcWorldDownloader();
+                         downloader.run();
+                         break;
+                     }
 
-                        emcWorldDownloader downloader = new emcWorldDownloader();
-                        downloader.run();
-                        break;
-                    }
+                     case 2: {
+                         mosaicMeDownloader getter = new mosaicMeDownloader();
+                         getter.run();
+                         break;
+                     }
 
-                    case 2: {
-                        mosaicMeDownloader getter = new mosaicMeDownloader();
-                        getter.run();
-                        break;
-                    }
+                     case 3: {
+                         mosaicMeUploader uploader = new mosaicMeUploader();
+                         uploader.run();
+                         break;
+                     }
 
-                    case 3: {
-                        mosaicMeUploader uploader = new mosaicMeUploader();
-                        uploader.run();
-                        break;
-                    }
+                     case 4: {
+                         (new Thread(new emcWorldDownloader())).start();
+                         (new Thread(new mosaicMeDownloader())).start();
+                         (new Thread(new mosaicMeUploader())).start();
+                         break;
+                     }
 
-                    case 4: {
-                        (new Thread(new emcWorldDownloader())).start();
-                        (new Thread(new mosaicMeDownloader())).start();
-                        (new Thread(new mosaicMeUploader())).start();
-                        break;
-                    }
+                     case 5: {
+                         System.exit(0);
+                     }
 
-                    case 5: {
-                        System.exit(0);
-                    }
+                     default: {
 
-                    default: {
+                         System.out.println("Please Choice number 1-4 Only.");
 
-                        System.out.println("Please Choice number 1-4 Only.");
-
-                        break;
-                    }
-
-
-                }
-            } else {
-                System.out.println("Please Choice number 1-4 Only.");
-
-            }
-        }
+                         break;
+                     }
 
 
+                 }
+             } else {
+                 System.out.println("Please Choice number 1-4 Only.");
+
+             }
+         }
+
+     }
+     catch(Exception e)
+     {
+             vLogger.LogError("ecs-sync:Error" + e.getMessage());
+
+         e.printStackTrace();
+     }
     }
 
 

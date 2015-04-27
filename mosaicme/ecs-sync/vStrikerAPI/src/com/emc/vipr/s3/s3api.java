@@ -55,6 +55,7 @@ public class s3api {
 		opt.setPathStyleAccess(true);
 		ViPRS3Client client = new ViPRS3Client(S3_ENDPOINT, creds);
 
+
 		client.setS3ClientOptions(opt);
 		if (S3_ViPR_NAMESPACE != null) {
 			client.setNamespace(S3_ViPR_NAMESPACE);
@@ -194,11 +195,6 @@ public class s3api {
 
 
 	}
-
-
-
-
-
 
 	public static void UpdateObject(String S3_ACCESS_KEY_ID,
 			String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,

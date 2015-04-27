@@ -26,7 +26,7 @@ public class mosaicMeDownloader  extends Thread{
     public void run() {
         try {
 
-
+            vLogger.LogInfo("mosaicMeDownloader: Start up");
             Properties prop = new Properties();
             ClassLoader classLoader = getClass().getClassLoader();
             prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
@@ -58,7 +58,7 @@ public class mosaicMeDownloader  extends Thread{
 
             channel.queueDeclare(DOWNLOAD_QUEUE_NAME, true, false, false, null);
             System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
-
+            vLogger.LogInfo("mosaicMeDownloader: [*] Waiting for messages. To exit press CTRL+C");
             channel.basicQos(1);
 
             QueueingConsumer consumer = new QueueingConsumer(channel);
@@ -68,20 +68,25 @@ public class mosaicMeDownloader  extends Thread{
                 QueueingConsumer.Delivery delivery = consumer.nextDelivery();
                 String message = new String(delivery.getBody());
 
+                vLogger.LogInfo("mosaicMeDownloader:  [x] Received '" + message + "'");
                 System.out.println(" [x] Received '" + message + "'");
                 downloadImage(message);
                 System.out.println(" [x] Done -" + (new Date()).toString());
+                vLogger.LogInfo("mosaicMeDownloader:[x]Done - " + (new Date()).toString());
 
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                        channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            vLogger.LogError("mosaicMeDownloader:" + e.getMessage());
         }
     }
 
     public void downloadImage(String image) {
         try {
             System.out.println(" Download Image '" + image + "'");
+            vLogger.LogInfo("mosaicMeDownloader: Download Image '" + image + "'");
+
             S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
                     S3_SECRET_KEY, S3_ENDPOINT, null,
                     S3_BUCKET, image);
@@ -102,12 +107,10 @@ public class mosaicMeDownloader  extends Thread{
             in.close();
             putMessge(image);
 
-        } catch (
-                Exception e
-                )
-
-        {
+        } catch (Exception e) {
             e.printStackTrace();
+            vLogger.LogError("mosaicMeDownloader:" + e.getMessage());
+
         }
 
     }
@@ -115,6 +118,7 @@ public class mosaicMeDownloader  extends Thread{
     public void  putMessge(String image) throws Exception
     {
         System.out.println(" Put Message on Q '" + ENGINE_QUEUE_NAME + "'");
+        vLogger.LogInfo("mosaicMeDownloader: Put Message on Q '" + ENGINE_QUEUE_NAME + "'");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(QUEUE_HOST_NAME);
@@ -129,6 +133,7 @@ public class mosaicMeDownloader  extends Thread{
                 MessageProperties.PERSISTENT_TEXT_PLAIN,
                 image.getBytes());
         System.out.println(" [x] Sent '" + image + "'");
+        vLogger.LogInfo("mosaicMeDownloader:  [x] Sent '" + image + "'");
 
         channel.close();
         connection.close();

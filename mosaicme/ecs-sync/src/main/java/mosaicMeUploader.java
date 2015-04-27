@@ -53,7 +53,7 @@ public class mosaicMeUploader  extends Thread{
     public void run() {
         try {
 
-
+            vLogger.LogInfo("mosaicMeUploader: Start up");
             Properties prop = new Properties();
             ClassLoader classLoader = getClass().getClassLoader();
             prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
@@ -102,6 +102,7 @@ public class mosaicMeUploader  extends Thread{
 
             channel.queueDeclare(DONE_QUEUE_NAME, true, false, false, null);
             System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+            vLogger.LogInfo("mosaicMeUploader:  [*] Waiting for messages. To exit press CTRL+C");
 
             channel.basicQos(1);
 
@@ -113,10 +114,11 @@ public class mosaicMeUploader  extends Thread{
                 String message = new String(delivery.getBody());
 
                 System.out.println(" [x] Received '" + message + "'");
-                uploadImage(message);
+                vLogger.LogInfo("mosaicMeUploader:  [x] Received '" + message + "'");
+                          uploadImage(message);
                 System.out.println(" [x] Done -" + (new Date()).toString());
-
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                vLogger.LogInfo("mosaicMeUploader:  [x] Done -" + (new Date()).toString());
+          channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 
 
 
@@ -130,6 +132,7 @@ public class mosaicMeUploader  extends Thread{
     public void uploadImage(String image) {
         try {
             System.out.println(" Download Image '" + image + "'");
+            vLogger.LogInfo("mosaicMeUploader:  Download Image '" + image + "'");
 
             String filelarge = MOSAIC_OUT_LARGE_DIR +"mosaic-"+image;
             String filesmall = MOSAIC_OUT_SMALL_DIR +"thm-"+image;
@@ -173,17 +176,15 @@ public class mosaicMeUploader  extends Thread{
 
             //Delete Files
         //    if(!(new File(filelarge).delete()))
-                System.out.println("Can not delete file "+filelarge);
+           //     System.out.println("Can not delete file "+filelarge);
 
        //     if(!(new File(filesmall).delete()))
-                System.out.println("Can not delete file "+filesmall);
+            //    System.out.println("Can not delete file "+filesmall);
 
-        } catch (
-                Exception e
-                )
-
+        } catch ( Exception e)
         {
             e.printStackTrace();
+            vLogger.LogError("mosaicMeUploader:"+e.getMessage());
         }
 
     }
@@ -191,6 +192,7 @@ public class mosaicMeUploader  extends Thread{
     public void  putMessge(String smallurl,String largeurl)
     {
         try {
+            vLogger.LogInfo("mosaicMeUploader: Put Message on twitter");
             System.out.println(" Put Message on twitter");
             System.out.println(" largeURL " +largeurl);
             //Instantiate a re-usable and thread-safe factory
@@ -217,12 +219,13 @@ public class mosaicMeUploader  extends Thread{
         catch(Exception e)
         {
             e.printStackTrace();
+            vLogger.LogError("mosaicMeUploader:"+e.getMessage());
         }
 
     }
 
     public String shortenURL(String largeurl) throws Exception {
-
+        vLogger.LogInfo("mosaicMeUploader: Shorten URL first");
         Provider bitly = Bitly.as(BIT_LY_LOGIN, BIT_LY_KEY_API);
         ShortenedUrl info =bitly.call(shorten(largeurl));
         System.out.println("Shorten URL "+info.getShortUrl());

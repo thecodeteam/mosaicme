@@ -22,7 +22,7 @@ public class emcWorldDownloader  extends Thread{
 
     public  void run() {
         try {
-
+            vLogger.LogInfo("emcWorldDownloader: Start up");
             Properties prop = new Properties();
             ClassLoader classLoader = getClass().getClassLoader();
             prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
@@ -42,6 +42,7 @@ public class emcWorldDownloader  extends Thread{
                 ObjectListing list = s3api.ReadBucket(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, S3_BUCKET);
 
                 System.out.println("bucket files count " + list.getObjectSummaries().size());
+                vLogger.LogInfo("emcWorldDownloader: bucket files count " + list.getObjectSummaries().size());
 
                 int s3Count = list.getObjectSummaries().size();
                 int localCount = new File(LOCAL_DIR).listFiles().length;
@@ -54,6 +55,7 @@ public class emcWorldDownloader  extends Thread{
 
                         if (!(new File(LOCAL_DIR, obj.getKey()).exists())) {
                             System.out.println("Downloading - " + obj.getKey());
+                            vLogger.LogInfo("emcWorldDownloader: Downloading - " + obj.getKey());
                             S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
                                     S3_SECRET_KEY, S3_ENDPOINT, null,
                                     S3_BUCKET, obj.getKey());
@@ -75,19 +77,21 @@ public class emcWorldDownloader  extends Thread{
                         }
                         else
                         {
-                            System.out.println("skipping - " + obj.getKey());
+                            System.out.println("Skipping - " + obj.getKey());
+                            vLogger.LogInfo("emcWorldDownloader: Skipping - " + obj.getKey());
                         }
                     }
                 }
                 else
                     System.out.println("No New Files Yet");
 
+                vLogger.LogInfo("emcWorldDownloader: Skipping - Sleep 60 seconds");
                 System.out.println("Sleep for 1 minute");
                 Thread.sleep(60000);
             }
 
         } catch (Exception e) {
-
+            vLogger.LogError("emcWorldDownloader:" + e.getMessage());
             e.printStackTrace();
         }
     }
