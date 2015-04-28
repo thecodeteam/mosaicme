@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import json
 
 import logging
 import logging.config
@@ -24,7 +25,7 @@ app.config_from_object('mosaicme.celeryconfig')
 
 
 @app.task
-def upload_image(img_id, url, bucket, s3_credentials, rmq_credentials, queue=None):
+def upload_image(img_id, url, twitter_user, bucket, s3_credentials, rmq_credentials, queue=None):
     logger.debug('Downloading picture (ID: %s, URL: %s)', img_id, url)
     r = requests.get(url, stream=True)
     if r.status_code != 200:
@@ -62,6 +63,8 @@ def upload_image(img_id, url, bucket, s3_credentials, rmq_credentials, queue=Non
     if queue:
         logger.info('Sending message to queue "%s" (ID: %s)', queue, img_id)
         try:
+            msg = {'twitter_user': twitter_user, 'media_id': img_id}
+
             connection = pika.BlockingConnection(pika.ConnectionParameters(
                 host=rmq_credentials['host'], port=rmq_credentials['port'],
                 credentials=pika.PlainCredentials(rmq_credentials['user'], rmq_credentials['password'])))
@@ -70,7 +73,7 @@ def upload_image(img_id, url, bucket, s3_credentials, rmq_credentials, queue=Non
             channel.queue_declare(queue=queue, durable=True)
             channel.basic_publish(exchange='',
                                   routing_key=queue,
-                                  body=img_name,
+                                  body=json.dumps(msg),
                                   properties=pika.BasicProperties(
                                       delivery_mode=2,  # make message persistent
                                   ))

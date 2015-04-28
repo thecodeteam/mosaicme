@@ -50,7 +50,9 @@ class TwitterListener(StreamListener):
             logger.warning('[Tweet] Could not parse JSON data. %s', str(e))
             return True
 
-        if data['user']['screen_name'].lower() == self.twitter_username.lower():
+        twitter_user = data['user']['screen_name']
+
+        if twitter_user.lower() == self.twitter_username.lower():
             logger.info('[Tweet] Ignoring tweet by user "%s"' % (self.twitter_username, ))
             return True
 
@@ -67,7 +69,7 @@ class TwitterListener(StreamListener):
             media_url = media['media_url']
             media_id = media['id_str']
             logger.info('[Tweet] Media found. ID: %s - URL: %s', media_id, media_url)
-            upload_image.delay(media_id, media_url, self.bucket, self.s3_credentials, self.rmq_credentials, queue=self.queue)
+            upload_image.delay(media_id, media_url, twitter_user, self.bucket, self.s3_credentials, self.rmq_credentials, queue=self.queue)
         return True
 
     def on_error(self, status):
