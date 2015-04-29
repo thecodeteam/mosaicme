@@ -17,6 +17,7 @@
 
         {% bootstrap_javascript jquery=True %}
         <script src="{% static 'js/angular.min.js' %}"></script>
+        <script src="{% static 'js/angular-route.min.js' %}"></script>
         <script src="{% static 'js/ui-bootstrap-tpls-0.12.1.min.js' %}"></script>
         <script src="{% static 'js/app.js' %}"></script>
         <script src="{% static 'js/jquery.min.js' %}"></script>
@@ -25,55 +26,9 @@
 
         <title></title>
     </head>
-    <body ng-controller="MosaicMeCtrl">
-        <div id="content-wrapper">
-            <h1>EMC CODE</h1>
+    <body>
 
-            <div id="carouselWidth">
-                <div id="carousel1">
-                    <ul>
-                        <li ng-repeat="image in allImages" on-last-repeat>
-                            {% verbatim %}<img ng-src="{{ image.url }}">{% endverbatim %}
-                        </li>
-                    </ul>
-                </div>
-                <p>
-                </p>
-            </div>
+        <div ng-view></div>
 
-            <div id="authorText">
-                <p><strong>MosaicMe Project</strong><br>
-                    <a href="http://emccode.github.io">emccode.github.io</a></p>
-            </div>
-        </div>
-
-        <div class="container">
-
-            <div class="row">
-
-                <div ng-repeat="image in displayImages" class="col-lg-3 col-md-4 col-xs-6 thumb">
-                    <a class="thumbnail" href="#">
-                        {% verbatim %}<img class="img-responsive" ng-src="{{ image.url }}" alt="">{% endverbatim %}
-                    </a>
-                </div>
-
-            </div>
-
-            <div class="text-center">
-                <pagination total-items="totalItems" ng-model="currentPage" items-per-page="itemsPerPage" ng-change="pageChanged()" boundary-links="true" rotate="false" num-pages="numPages"></pagination>
-            </div>
-
-            <hr>
-
-            <!-- Footer -->
-            <footer>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <p>MosaicMe - An EMC{code} project</p>
-                    </div>
-                </div>
-            </footer>
-
-        </div>
     </body>
 </html>
