@@ -61,11 +61,13 @@ class TwitterListener(StreamListener):
             return True
         if 'media' not in data['extended_entities']:
             logger.debug('[Tweet] No media found')
+            return True
         if not data['extended_entities']['media']:
             logger.debug('[Tweet] No media found')
+            return True
         for media in data['extended_entities']['media']:
             if media['type'] != 'photo':
-                pass
+                continue
             media_url = media['media_url']
             media_id = media['id_str']
             logger.info('[Tweet] Media found. ID: %s - URL: %s', media_id, media_url)
