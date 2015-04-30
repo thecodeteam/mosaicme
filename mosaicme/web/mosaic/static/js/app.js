@@ -28,6 +28,21 @@ mosaicmeApp
             }, 1);
         };
     })
+    .directive('imageOnLoad', function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                element.bind('load', function () {
+                    $("#mosaic-img").elevateZoom({
+                        zoomType: "lens",
+                        lensShape: "round",
+                        lensSize: 200,
+                        scrollZoom : true
+                    });
+                });
+            }
+        };
+    })
     .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
 
         $scope.$on('onRepeatLast', function (scope, element, attrs) {
@@ -68,7 +83,7 @@ mosaicmeApp
     .controller('MosaicDetailsCtrl', ['$scope', '$http', '$routeParams',
         function ($scope, $http, $routeParams) {
 
-            $http.get('/mosaic/'  + $routeParams.mosaicId).
+            $http.get('/mosaic/' + $routeParams.mosaicId).
                 success(function (data, status, headers, config) {
                     $scope.imageUrl = data['url'];
                 }).
@@ -76,4 +91,4 @@ mosaicmeApp
                     alert('Error getting the mosaic!');
                 });
 
-    }]);
+        }]);

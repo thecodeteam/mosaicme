@@ -8,4 +8,5 @@ $(document).ready(function(){
 	//		autoplayInterval:5000,
 	//		loader: 'static/images/ajax-loader.gif'
 	//	});
+
 });
