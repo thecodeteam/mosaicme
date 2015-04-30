@@ -1,4 +1,4 @@
-var mosaicmeApp = angular.module('mosaicmeApp', ['ui.bootstrap', 'ngRoute', 'angularMoment', 'cgBusy']).config(function ($httpProvider) {
+var mosaicmeApp = angular.module('mosaicmeApp', ['ui.bootstrap', 'ngRoute', 'angularMoment', 'cgBusy', 'ngDialog']).config(function ($httpProvider) {
 
     $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -53,7 +53,7 @@ mosaicmeApp
                 return viewLocation === $location.path();
         };
     }])
-    .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
+    .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log, ngDialog) {
 
         $scope.carouselInterval = 3000;
 
@@ -70,7 +70,7 @@ mosaicmeApp
 
         $scope.loadPromise = $http.get('/mosaic').
             success(function (data, status, headers, config) {
-                $scope.allImages = data['images'];
+                $scope.allImages = data['mosaics'];
                 $scope.latestImages = $scope.allImages.slice(0, 5);
                 $scope.totalItems = data['size'];
 
@@ -87,9 +87,10 @@ mosaicmeApp
 
             $scope.loadPromise = $http.get('/mosaic/' + $routeParams.mosaicId).
                 success(function (data, status, headers, config) {
-                    $scope.imageUrl = data['url'];
-                    $scope.username = 'Android';
-                    $scope.createdAt = new Date();
+                    $scope.urlSmall = data['url_small'];
+                    $scope.urlLarge = data['url_large'];
+                    $scope.username = data['username'];
+                    $scope.createdAt = data['date'];
 
                     $scope.loaded = true;
                 }).

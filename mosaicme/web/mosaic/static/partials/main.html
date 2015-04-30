@@ -26,10 +26,10 @@
 
                 <carousel interval="carouselInterval">
                     <slide ng-repeat="image in latestImages" active="slide.active">
-                        <img class="mosaic-carousel" ng-src="{{ image.url }}">
+                        <img class="mosaic-carousel" ng-src="{{ image.url_small }}">
 
                         <div class="carousel-caption">
-                            <h4>Mosaic by @User</h4>
+                            <h4>Mosaic by @{{ image.username }}</h4>
                         </div>
                     </slide>
                 </carousel>
@@ -43,10 +43,10 @@
 
             <div ng-repeat="image in displayImages" class="col-lg-3 col-md-4 col-xs-6 thumb text-center top-buffer">
                 <a class="thumbnail" href="#/mosaic/{{ image.id }}">
-                    <img class="img-responsive" ng-src="{{ image.url }}" alt="">
+                    <img class="img-responsive" ng-src="{{ image.url_small }}" alt="">
                 </a>
 
-                <p>Mosaic by @User</p>
+                <p>Mosaic by @{{ image.username }}</p>
             </div>
         </div>
 
