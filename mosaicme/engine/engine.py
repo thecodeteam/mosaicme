@@ -6,8 +6,14 @@ import os.path
 import shutil
 import os
 import configparser
+import logging
+import logging.config
+import json;
 
 def copySourceFile(imagename):
+
+    logging.info("Read Source msg ...."+imagename)
+
     print "Copy Source File ...."
     # check if file exist under share/in
     src = "/mosaic/in/"+imagename
@@ -16,6 +22,7 @@ def copySourceFile(imagename):
     # copy to destination process/tmp
         shutil.copyfile(src, dst)
         print " [x] Finished copying "+imagename+" locally"
+        logging.info('[engine]  [x] Finished copying '+imagename+' locally')
         return True
     else:
         return False
@@ -25,6 +32,7 @@ def buildTiles():
     print "build Tiles ...."
     os.system("metapixel-prepare /mosaic/raw tiles/ --width=32 --height=32")
     print " [x] Finished building tiles"
+    logging.info('[engine] [x] Finished building tiles')
 
 
 def createMosaic(imagename):
@@ -34,6 +42,7 @@ def createMosaic(imagename):
     dest="/engine/tiles/"
     os.system("metapixel --metapixel "+src+" "+out+" --library "+dest+" --scale=10 --distance=5")
     print " [x] Finished Creating Mosaic File"
+    logging.info('[engine] [x] Finished Creating Mosaic File')
 
 
 def createThumbnails(imagename):
@@ -44,7 +53,7 @@ def createThumbnails(imagename):
 
     os.system("convert -thumbnail "+str(thm_size)+" "+src+" "+out)
     print " [x] Finished Creating Mosaic File"
-
+    logging.info('[engine] [x] Finished Creating Mosaic File')
 
 def moveFiles(imagename):
     print "Move Files...."
@@ -61,9 +70,9 @@ def moveFiles(imagename):
             shutil.copyfile(src2, dst2)
 
     print " [x] Finished moving files"
+    logging.info('[engine] [x] Finished moving files')
 
-
-def putMsg(imagename):
+def putMsg(msg):
     print "Put Msg ...."
     global hostname
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
@@ -71,42 +80,63 @@ def putMsg(imagename):
     channel.queue_declare(queue='mosaic-finish', durable=True)
     channel.basic_publish(exchange='',
                           routing_key='mosaic-finish',
-                          body=imagename,
+                          body=msg,
                           properties=pika.BasicProperties(
                              delivery_mode = 2, # make message persistent
                           ))
-    print " [x] Sent %r" % (imagename,)
+    print " [x] Sent %r" % (msg,)
+    logging.info('[engine] [x] Sent %r' % (msg,))
     connection.close()
 
     print " [x] Finished Putting Msg"
+    logging.info('[engine]  [x] Finished Putting Msg')
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
+logger = logging.getLogger(__name__)
 
 print "Read setting ini"
+logger.info('[engine] Read Setting ini')
 config = configparser.ConfigParser()
 config.read('engine.ini')
 hostname =config['DEFAULT']['hostname']
 thm_size =config['DEFAULT']['thm_size']
-print "Host "+hostname
-print "thm_size"+str(thm_size)
+queueeng=config['DEFAULT']['queueeng']
+queueout=config['DEFAULT']['queueout']
+
+logging.info('[engine] Host '+hostname)
+logging.info('[engine] Thum Size '+str(thm_size))
+logging.info('[engine] Queue In '+queueeng)
+logging.info('[engine] Queue Out '+queueout)
+body="{\"twitter_user\": \"TheUser\",\"media_id\": \"342554325324532\"}"
+data=json.loads(body)
+image=data["media_id"]
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
 channel = connection.channel()
 channel.queue_declare(queue='mosaic-eng', durable=True)
 print ' [*] Waiting for messages. To exit press CTRL+C'
+logging.info('[engine]  [*] Waiting for messages. To exit press CTRL+C')
 def callback(ch, method, properties, body):
+        logging.info('[engine]  [x] Received %r' % (body,))
         print " [x] Received %r" % (body,)
+        data=json.loads(body)
+        image=data["media_id"]
         # copy file to local temp
-        if(copySourceFile(body)):
+        if(copySourceFile(image)):
             #covert share to small
             buildTiles()
             #call to create mosaic file
-            createMosaic(body)
+            createMosaic(image)
             #create thumnails
-            createThumbnails(body)
+            createThumbnails(image)
             #move files
-            moveFiles(body)
+            moveFiles(image)
             #put msg
             putMsg(body)
         print " [x] Done"
+        logging.info('[engine] Done')
         time.sleep(5)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 

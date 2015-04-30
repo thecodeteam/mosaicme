@@ -12,6 +12,12 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.MessageProperties;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
+
+
 public class mosaicMeDownloader  extends Thread{
     public String ENGINE_QUEUE_NAME = "";
     public String DOWNLOAD_QUEUE_NAME = "";
@@ -23,8 +29,10 @@ public class mosaicMeDownloader  extends Thread{
     public String LOCAL_DIR = "";
     public String MOSAIC_IN_DIR = "";
 
+
     public void run() {
         try {
+
 
             vLogger.LogInfo("mosaicMeDownloader: Start up");
             Properties prop = new Properties();
@@ -82,11 +90,15 @@ public class mosaicMeDownloader  extends Thread{
         }
     }
 
-    public void downloadImage(String image) {
+    public void downloadImage(String msg) {
         try {
-            System.out.println(" Download Image '" + image + "'");
-            vLogger.LogInfo("mosaicMeDownloader: Download Image '" + image + "'");
 
+            System.out.println(" Download Image '" + msg + "'");
+            vLogger.LogInfo("mosaicMeDownloader: Download Image '" + msg + "'");
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(msg);
+            String image = (String) jsonObject.get("media_id") +".jpg";
+            vLogger.LogInfo("mosaicMeDownloader: Download image '" + image + "'");
             S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
                     S3_SECRET_KEY, S3_ENDPOINT, null,
                     S3_BUCKET, image);
@@ -105,7 +117,7 @@ public class mosaicMeDownloader  extends Thread{
             }
             out.close();
             in.close();
-            putMessge(image);
+            putMessge(msg);
 
         } catch (Exception e) {
             e.printStackTrace();

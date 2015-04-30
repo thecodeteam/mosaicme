@@ -19,7 +19,10 @@ import com.amazonaws.HttpMethod;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import javafx.scene.control.Hyperlink;
+import org.json.simple.*;
+import org.json.simple.parser.JSONParser;
 import twitter4j.*;
+import twitter4j.JSONObject;
 import twitter4j.auth.AccessToken;
 import com.rosaloves.bitlyj.*;
 import static com.rosaloves.bitlyj.Bitly.*;
@@ -129,10 +132,17 @@ public class mosaicMeUploader  extends Thread{
         }
     }
 
-    public void uploadImage(String image) {
+    public void uploadImage(String msg) {
         try {
-            System.out.println(" Download Image '" + image + "'");
-            vLogger.LogInfo("mosaicMeUploader:  Download Image '" + image + "'");
+            System.out.println(" Download Image '" + msg + "'");
+            vLogger.LogInfo("mosaicMeUploader:  Download Image '" + msg + "'");
+
+            System.out.println(" Download Image '" + msg + "'");
+            vLogger.LogInfo("mosaicMeDownloader: Download Image '" + msg + "'");
+            JSONParser jsonParser = new JSONParser();
+            org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) jsonParser.parse(msg);
+            String image = (String) jsonObject.get("media_id") +".jpg";
+            String user = (String) jsonObject.get("twitter_user");
 
             String filelarge = MOSAIC_OUT_LARGE_DIR +"mosaic-"+image;
             String filesmall = MOSAIC_OUT_SMALL_DIR +"thm-"+image;
@@ -172,7 +182,7 @@ public class mosaicMeUploader  extends Thread{
 
             URL largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
 
-            putMessge(smallurl.toString(),largeurl.toString());
+            putMessge(smallurl.toString(),largeurl.toString(),user);
 
             //Delete Files
         //    if(!(new File(filelarge).delete()))
@@ -189,7 +199,7 @@ public class mosaicMeUploader  extends Thread{
 
     }
 
-    public void  putMessge(String smallurl,String largeurl)
+    public void  putMessge(String smallurl,String largeurl, String tweetuser)
     {
         try {
             vLogger.LogInfo("mosaicMeUploader: Put Message on twitter");
@@ -210,7 +220,7 @@ public class mosaicMeUploader  extends Thread{
             //Instantiate and initialize a new twitter status update
             //String msg="http://10.243.188.101:10101/mosaic-outlarge/mosaic-penguins.jpg?Signature=vNXXsGWjFRIxFqssKYB1hqXHqv4%3D&AWSAccessKeyId=wuser1%40sanity.local&Expires=1431224053";
 
-            StatusUpdate statusUpdate = new StatusUpdate(TWITTER_TEXT+" - "+shortenURL(largeurl));
+            StatusUpdate statusUpdate = new StatusUpdate("@"+tweetuser+" "+TWITTER_TEXT+" - "+shortenURL(largeurl));
             //attach any media, if you want to
             statusUpdate.setMedia("", new URL(smallurl).openStream());
             Status status = twitter.updateStatus(statusUpdate);
