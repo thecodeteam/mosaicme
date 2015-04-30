@@ -1,4 +1,5 @@
 import boto
+import time
 from boto.s3.connection import S3Connection
 from django.conf import settings
 from django.http import JsonResponse
@@ -20,8 +21,29 @@ def mosaic_list(request):
     data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
     data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
     data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
+    data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
+    data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
+    data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
+    data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
+    data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
+    data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
+    data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
 
     data['size'] = len(data['images'])
+
+    time.sleep(2)
+
     return JsonResponse(data)
 
 

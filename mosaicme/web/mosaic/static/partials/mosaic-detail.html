@@ -1,1 +1,15 @@
-<img id="mosaic-img" width="500" ng-src="{{ imageUrl }}" data-zoom-image="{{ imageUrl }}" image-on-load>
+<div class="container">
+
+    <div class="jumbotron top-buffer" ng-show="loaded">
+        <img id="mosaic-img" ng-src="{{ imageUrl }}" data-zoom-image="{{ imageUrl }}" image-on-load>
+
+        <h3>
+            Mosaic sent by <a href="http://twitter.com/{{ username }}">{{ username }}</a>
+            <span am-time-ago="createdAt"></span>
+        </h3>
+    </div>
+
+    <ul class="pager">
+      <li class="previous"><a href="/#/">← Back</a></li>
+    </ul>
+</div>

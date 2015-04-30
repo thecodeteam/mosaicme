@@ -1,4 +1,4 @@
-var mosaicmeApp = angular.module('mosaicmeApp', ['ui.bootstrap', 'ngRoute']).config(function ($httpProvider) {
+var mosaicmeApp = angular.module('mosaicmeApp', ['ui.bootstrap', 'ngRoute', 'angularMoment', 'cgBusy']).config(function ($httpProvider) {
 
     $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -16,8 +16,11 @@ mosaicmeApp
             .when('/mosaic/:mosaicId', {
                 templateUrl: 'static/partials/mosaic-detail.html',
                 controller: 'MosaicDetailsCtrl'
-            }).
-            otherwise({
+            })
+            .when('/learn-more', {
+                templateUrl: 'static/partials/learn-more.html'
+            })
+            .otherwise({
                 redirectTo: '/'
             });
     })
@@ -43,6 +46,13 @@ mosaicmeApp
             }
         };
     })
+    .controller('HeaderCtrl', ['$scope', '$location',
+        function ($scope, $location) {
+
+            $scope.isActive = function (viewLocation) {
+                return viewLocation === $location.path();
+        };
+    }])
     .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
 
         $scope.carouselInterval = 3000;
@@ -58,11 +68,13 @@ mosaicmeApp
         $scope.currentPage = 1;
         $scope.itemsPerPage = 8;
 
-        $http.get('/mosaic').
+        $scope.loadPromise = $http.get('/mosaic').
             success(function (data, status, headers, config) {
                 $scope.allImages = data['images'];
+                $scope.latestImages = $scope.allImages.slice(0, 5);
                 $scope.totalItems = data['size'];
 
+                $scope.loaded = true;
                 $scope.pageChanged();
             }).
             error(function (data, status, headers, config) {
@@ -73,12 +85,21 @@ mosaicmeApp
     .controller('MosaicDetailsCtrl', ['$scope', '$http', '$routeParams',
         function ($scope, $http, $routeParams) {
 
-            $http.get('/mosaic/' + $routeParams.mosaicId).
+            $scope.loadPromise = $http.get('/mosaic/' + $routeParams.mosaicId).
                 success(function (data, status, headers, config) {
                     $scope.imageUrl = data['url'];
+                    $scope.username = 'Android';
+                    $scope.createdAt = new Date();
+
+                    $scope.loaded = true;
                 }).
                 error(function (data, status, headers, config) {
                     alert('Error getting the mosaic!');
                 });
+
+
+            $scope.$on("$destroy", function() {
+                $('#mosaic-img').remove();
+            });
 
         }]);
