@@ -45,17 +45,7 @@ mosaicmeApp
     })
     .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
 
-        $scope.$on('onRepeatLast', function (scope, element, attrs) {
-            $("#carousel1").tiksluscarousel(
-                {
-                    width: 0,
-                    height: 0,
-                    nav: 'thumbnails',
-                    current: 1,
-                    autoplayInterval: 5000,
-                    loader: 'static/images/ajax-loader.gif'
-                });
-        });
+        $scope.carouselInterval = 3000;
 
         $scope.pageChanged = function () {
             $log.log('Page changed to: ' + $scope.currentPage);
