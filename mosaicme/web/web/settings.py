@@ -96,3 +96,10 @@ S3_PORT = int(os.environ['S3_PORT'])
 S3_ACCESS_KEY = os.environ['S3_ACCESS_KEY']
 S3_SECRET_KEY = os.environ['S3_SECRET_KEY']
 S3_HTTPS = json.loads(os.environ['S3_HTTPS'].lower())
+
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+
+CACHE_LIFE = 600

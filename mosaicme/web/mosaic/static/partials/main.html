@@ -1,0 +1,63 @@
+<div>
+    <div class="jumbotron">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-sm-10">
+                    <p>
+                        <strong>MosaicMe</strong> is a microservice application that retrieves images from selected
+                        Twitter feeds, stores them on an object store, and then it processes them to
+                        build a mosaic based on a selected set of pictures.
+                    </p>
+                    <p>
+                        <a class="btn btn-primary btn-lg" href="#/learn-more" role="button">Learn more »</a>
+                    </p>
+                </div>
+                <div class="col-md-2 col-sm-2">
+                    <img class="img-responsive" src="http://emccode.github.io/images/badge.png">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" cg-busy="{promise:loadPromise,message:'Loading mosaics...',backdrop:false,delay:300,minDuration:700}" style="min-height: 200px;">
+        <div class="row">
+            <div class="col-lg-12" ng-show="loaded">
+                <h3>Latest mosaics</h3>
+
+                <carousel interval="carouselInterval">
+                    <slide ng-repeat="image in latestImages" active="slide.active">
+                        <a href="#/mosaic/{{ image.id }}">
+                            <img class="mosaic-carousel" ng-src="{{ image.url_small }}">
+
+                            <div class="carousel-caption">
+                                <h4>Mosaic by @{{ image.username }} <span am-time-ago="image.date"></span></h4>
+                            </div>
+                        </a>
+                    </slide>
+                </carousel>
+            </div>
+        </div>
+    </div>
+
+    <div class="container top-buffer">
+        <div class="row" ng-show="loaded">
+            <h3>Mosaic gallery</h3>
+
+            <div ng-repeat="image in displayImages" class="col-lg-3 col-md-4 col-xs-6 text-center top-buffer">
+                <a class="thumbnail" href="#/mosaic/{{ image.id }}">
+                    <div class="thumbnail-container">
+                        <img class="" ng-src="{{ image.url_small }}" alt="" on-thumbnail-loaded>
+                    </div>
+                </a>
+                <p>Sent by <a target="_blank" href="http://twitter.com/{{ image.username }}">@{{ image.username }}</a> <span am-time-ago="image.date"></span></p>
+            </div>
+        </div>
+
+        <div class="col-lg-12 text-center" ng-show="loaded">
+            <pagination total-items="totalItems" ng-model="currentPage" items-per-page="itemsPerPage"
+                        ng-change="pageChanged()" boundary-links="true" rotate="false" num-pages="numPages"></pagination>
+        </div>
+    </div>
+
+
+</div>
