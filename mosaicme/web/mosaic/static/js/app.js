@@ -31,28 +31,67 @@ mosaicmeApp
             }, 1);
         };
     })
-    .directive('imageOnLoad', function () {
+    .directive('ngElevateZoom', function () {
         return {
             restrict: 'A',
             link: function (scope, element, attrs) {
-                element.bind('load', function () {
-                    $("#mosaic-img").elevateZoom({
+                console.log("Linking")
+
+                //Will watch for changes on the attribute
+                attrs.$observe('zoomImage', function () {
+                    linkElevateZoom();
+                });
+
+                function linkElevateZoom() {
+                    //Check if its not empty
+                    if (!attrs.zoomImage) return;
+
+                    $('#mosaic-loading-bar').remove();
+
+                    element.attr('data-zoom-image', attrs.zoomImage);
+                    $(element).elevateZoom({
                         zoomType: "lens",
                         lensShape: "round",
                         lensSize: 200,
-                        scrollZoom : true
+                        scrollZoom: true
                     });
-                });
+                }
+
+                linkElevateZoom();
+
             }
         };
+    })
+    .directive('zoomContainer', function () {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                scope.$on('$routeChangeSuccess', function () {
+
+                    var target = element.children('div.zoomContainer').remove();
+                })
+            }
+        }
+
+    })
+    .directive('onThumbnailLoaded', function () {
+        return {
+            link: function(scope, element, attrs) {
+                element.bind("load" , function(e){
+                    var imgClass = (this.width / this.height > 1) ? 'wide' : 'tall';
+                    $(this).addClass(imgClass);
+                });
+            }
+        }
     })
     .controller('HeaderCtrl', ['$scope', '$location',
         function ($scope, $location) {
 
             $scope.isActive = function (viewLocation) {
                 return viewLocation === $location.path();
-        };
-    }])
+            };
+        }
+    ])
     .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
 
         $scope.carouselInterval = 3000;
@@ -62,7 +101,6 @@ mosaicmeApp
 
             var start = ($scope.currentPage - 1) * $scope.itemsPerPage;
             $scope.displayImages = $scope.allImages.slice(start, start + $scope.itemsPerPage);
-
         };
 
         $scope.currentPage = 1;
@@ -99,7 +137,7 @@ mosaicmeApp
                 });
 
 
-            $scope.$on("$destroy", function() {
+            $scope.$on("$destroy", function () {
                 $('#mosaic-img').remove();
             });
 

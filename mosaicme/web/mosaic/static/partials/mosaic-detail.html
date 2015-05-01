@@ -1,10 +1,13 @@
-<div class="container">
+<div class="container" cg-busy="{promise:loadPromise,message:'Loading mosaic...',backdrop:false,delay:300,minDuration:700}" style="min-height: 200px;">
 
     <div class="jumbotron top-buffer" ng-show="loaded">
-        <img id="mosaic-img" ng-src="{{ urlSmall }}" data-zoom-image="{{ urlLarge }}" image-on-load>
+
+        <img ng-elevate-zoom class="img-responsive" ng-src="{{ urlSmall }}" zoom-image="{{ urlLarge }}" />
+
+        <progressbar id="mosaic-loading-bar" class="progress-striped active top-buffer" max="100" value="100">Downloading full size mosaic, please wait...</progressbar>
 
         <h3>
-            Mosaic sent by <a href="http://twitter.com/{{ username }}">{{ username }}</a>
+            Mosaic sent by <a target="_blank" href="http://twitter.com/{{ username }}">@{{ username }}</a>
             <span am-time-ago="createdAt"></span>
         </h3>
     </div>

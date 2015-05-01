@@ -12,10 +12,6 @@
     margin-bottom: 0px !important;
 }
 
-.thumbnail {
-    min-height: 200px;
-}
-
 .img-responsive {
     width: 100%;
     height: 100%;
@@ -28,4 +24,26 @@
   width: 100%;
     padding: 20px;
   background-color: #303030;
+}
+
+
+.progress .progress-bar {
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.progress {
+    height: 20px;
+}
+
+.thumbnail-container {
+    height: 200px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.thumbnail-container img.wide {
+    max-height: 100%;
+}
+.thumbnail-container img.tall {
+    max-width: 100%;
 }

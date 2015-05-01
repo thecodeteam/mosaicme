@@ -1,4 +1,4 @@
-import datetime
+import time
 import json
 
 import boto
@@ -15,41 +15,7 @@ def index(request):
 
 def mosaic_list(request):
 
-    # data = dict()
-    # data['images'] = []
-    # data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://charleshood.net/wp-content/uploads/2010/05/IMG_2080.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://infocus.emc.com/wp-content/uploads/2013/06/8717630635_4d7c4bb014_z.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://jasonnash.files.wordpress.com/2012/05/lab-2.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://i.vimeocdn.com/video/437533496_640.jpg'})
-    # data['images'].append({'id': '123', 'url': 'https://oxygencloudblog.files.wordpress.com/2011/05/img_0016.jpg'})
-    # data['images'].append({'id': '123', 'url': 'http://blogs.cisco.com/wp-content/uploads/935566_10151574064859817_836422499_n-550x365.jpg'})
-    #
-    # data['size'] = len(data['images'])
-    #
-    # time.sleep(2)
-    #
-    # return JsonResponse(data)
-
     r = init_redis()
-
     mosaic_cache = r.get('mosaic:all')
     if mosaic_cache:
         return JsonResponse(json.loads(mosaic_cache))
@@ -80,7 +46,7 @@ def mosaic_list(request):
         mosaic['id'] = key.name
         mosaic['url_small'] = 'https:' + url_small
         mosaic['url_large'] = 'https:' + url_large
-        mosaic['username'] = 'Android'
+        mosaic['username'] = 'EMCcorp'
         mosaic['date'] = key.last_modified
 
         r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
@@ -89,7 +55,7 @@ def mosaic_list(request):
 
     data['size'] = len(data['mosaics'])
 
-    r.set('mosaic:all', json.dumps(data), ex=60)
+    r.set('mosaic:all', json.dumps(data), ex=settings.CACHE_LIFE)
 
     return JsonResponse(data)
 
@@ -124,7 +90,7 @@ def mosaic_detail(request, mosaic_id):
     mosaic['id'] = mosaic_id
     mosaic['url_small'] = 'https:' + url_small
     mosaic['url_large'] = 'https:' + url_large
-    mosaic['username'] = 'Android'
+    mosaic['username'] = 'EMCcorp'
     mosaic['date'] = key_large.last_modified
 
     r.set('mosaic:{}'.format(mosaic_id), json.dumps(mosaic))
