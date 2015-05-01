@@ -1,4 +1,4 @@
-var mosaicmeApp = angular.module('mosaicmeApp', ['ui.bootstrap', 'ngRoute', 'angularMoment', 'cgBusy', 'ngDialog']).config(function ($httpProvider) {
+var mosaicmeApp = angular.module('mosaicmeApp', ['ui.bootstrap', 'ngRoute', 'angularMoment', 'cgBusy']).config(function ($httpProvider) {
 
     $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -53,7 +53,7 @@ mosaicmeApp
                 return viewLocation === $location.path();
         };
     }])
-    .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log, ngDialog) {
+    .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
 
         $scope.carouselInterval = 3000;
 
