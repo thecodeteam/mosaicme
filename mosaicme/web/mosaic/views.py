@@ -1,11 +1,12 @@
-import boto
-import time
-from boto.s3.connection import S3Connection
 import datetime
+import json
+
+import boto
+from boto.s3.connection import S3Connection
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.generic import View
+from models import init_redis
 
 
 def index(request):
@@ -47,6 +48,11 @@ def mosaic_list(request):
     #
     # return JsonResponse(data)
 
+    r = init_redis()
+
+    mosaic_cache = r.get('mosaic:all')
+    if mosaic_cache:
+        return JsonResponse(json.loads(mosaic_cache))
 
     s3_conn = S3Connection(aws_access_key_id=settings.S3_ACCESS_KEY,
                            aws_secret_access_key=settings.S3_SECRET_KEY,
@@ -75,16 +81,25 @@ def mosaic_list(request):
         mosaic['url_small'] = 'https:' + url_small
         mosaic['url_large'] = 'https:' + url_large
         mosaic['username'] = 'Android'
-        mosaic['date'] = datetime.datetime.now()
+        mosaic['date'] = key.last_modified
+
+        r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
 
         data['mosaics'].append(mosaic)
 
     data['size'] = len(data['mosaics'])
 
+    r.set('mosaic:all', json.dumps(data), ex=60)
+
     return JsonResponse(data)
 
 
 def mosaic_detail(request, mosaic_id):
+
+    r = init_redis()
+    mosaic_cache = r.get('mosaic:{}'.format(mosaic_id))
+    if mosaic_cache:
+        return JsonResponse(json.loads(mosaic_cache))
 
     s3_conn = S3Connection(aws_access_key_id=settings.S3_ACCESS_KEY,
                            aws_secret_access_key=settings.S3_SECRET_KEY,
@@ -111,5 +126,7 @@ def mosaic_detail(request, mosaic_id):
     mosaic['url_large'] = 'https:' + url_large
     mosaic['username'] = 'Android'
     mosaic['date'] = key_large.last_modified
+
+    r.set('mosaic:{}'.format(mosaic_id), json.dumps(mosaic))
 
     return JsonResponse(mosaic)
