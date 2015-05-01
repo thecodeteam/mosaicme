@@ -114,7 +114,7 @@ public class emcWorldDownloader  extends Thread{
     {
 
 
-        if(PB_ACTIVE=="1") {
+        if(PB_ACTIVE.equals("1")) {
             // Download the files from the bucket
             ObjectListing list = s3api.ReadBucket(PB_S3_ACCESS_KEY_ID, PB_S3_SECRET_KEY, PB_S3_ENDPOINT, null, PB_S3_BUCKET);
             System.out.println("bucket files count " + list.getObjectSummaries().size());
