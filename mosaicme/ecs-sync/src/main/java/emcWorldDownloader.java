@@ -48,6 +48,7 @@ public class emcWorldDownloader  extends Thread{
             PB_S3_SECRET_KEY = prop.getProperty("photobooth-pass");
             PB_S3_ENDPOINT = prop.getProperty("photobooth-proxy");
             PB_S3_BUCKET = prop.getProperty("photobooth-bucket");
+            PB_ACTIVE = prop.getProperty("photobooth-active");
 
             while(true) {
                 ObjectListing list = s3api.ReadBucket(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, S3_BUCKET);
@@ -96,7 +97,7 @@ public class emcWorldDownloader  extends Thread{
                 else
                     System.out.println("No New Files Yet");
 
-
+                System.out.println("Download PhotoBooth");
                 vLogger.LogInfo("emcWorldDownloader: Download PhotoBooth");
                 DownloadPhotoBooth();
                 vLogger.LogInfo("emcWorldDownloader: Skipping - Sleep 60 seconds");
@@ -113,7 +114,7 @@ public class emcWorldDownloader  extends Thread{
     public void DownloadPhotoBooth() throws Exception
     {
 
-
+        System.out.println("PhotoBooth flag " + PB_ACTIVE);
         if(PB_ACTIVE.equals("1")) {
             // Download the files from the bucket
             ObjectListing list = s3api.ReadBucket(PB_S3_ACCESS_KEY_ID, PB_S3_SECRET_KEY, PB_S3_ENDPOINT, null, PB_S3_BUCKET);
@@ -121,13 +122,14 @@ public class emcWorldDownloader  extends Thread{
             vLogger.LogInfo("emcWorldDownloader:PhotoBooth: bucket files count " + list.getObjectSummaries().size());
             for (S3ObjectSummary obj :
                     list.getObjectSummaries()) {
-
-                vLogger.LogInfo("emcWorldDownloader:PhotoBooth: Download file " + obj.getKey());
+                System.out.println("Download file " + obj.getKey());
+                    vLogger.LogInfo("emcWorldDownloader:PhotoBooth: Download file " + obj.getKey());
                 S3ObjectInputStream in = s3api.ReadObject(PB_S3_ACCESS_KEY_ID,
                         PB_S3_SECRET_KEY, PB_S3_ENDPOINT, null,
                         PB_S3_BUCKET, obj.getKey());
 
                 // Uploda the file to emcworld bucket
+                System.out.println("Upload file to emcworld bucket " + obj.getKey());
                 vLogger.LogInfo("emcWorldDownloader:PhotoBooth: Upload file to emcworld bucket " + obj.getKey());
                 s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,S3_BUCKET,obj.getKey(), in);
             }
