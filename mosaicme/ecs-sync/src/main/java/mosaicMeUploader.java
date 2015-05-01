@@ -144,10 +144,10 @@ public class mosaicMeUploader  extends Thread{
             String image = (String) jsonObject.get("media_id") +".jpg";
             String user = (String) jsonObject.get("twitter_user");
 
-            String filelarge = MOSAIC_OUT_LARGE_DIR +"mosaic-"+image;
-            String filesmall = MOSAIC_OUT_SMALL_DIR +"thm-"+image;
-            String largeimage="mosaic-"+image;
-            String smallimage="thm-"+image;
+            String filelarge = MOSAIC_OUT_LARGE_DIR +image;
+            String filesmall = MOSAIC_OUT_SMALL_DIR +image;
+            String largeimage=image;
+            String smallimage=image;
 
 
             FileInputStream fis2 = new FileInputStream(filesmall);

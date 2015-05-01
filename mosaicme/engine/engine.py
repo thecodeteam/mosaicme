@@ -59,8 +59,8 @@ def moveFiles(imagename):
     print "Move Files...."
     src = "/engine/tmp/mosaic-"+imagename
     src2 = "/engine/tmp/thm-"+imagename
-    dst = "/mosaic/out/large/mosaic-"+imagename
-    dst2 = "/mosaic/out/small/thm-"+imagename
+    dst = "/mosaic/out/large/"+imagename
+    dst2 = "/mosaic/out/small/"+imagename
     if(os.path.isfile(src)):
         # copy to destination mosaic/out
             shutil.copyfile(src, dst)
@@ -109,9 +109,6 @@ logging.info('[engine] Host '+hostname)
 logging.info('[engine] Thum Size '+str(thm_size))
 logging.info('[engine] Queue In '+queueeng)
 logging.info('[engine] Queue Out '+queueout)
-body="{\"twitter_user\": \"TheUser\",\"media_id\": \"342554325324532\"}"
-data=json.loads(body)
-image=data["media_id"]
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
 channel = connection.channel()
@@ -122,7 +119,7 @@ def callback(ch, method, properties, body):
         logging.info('[engine]  [x] Received %r' % (body,))
         print " [x] Received %r" % (body,)
         data=json.loads(body)
-        image=data["media_id"]
+        image=data["media_id"]+".jpg";
         # copy file to local temp
         if(copySourceFile(image)):
             #covert share to small
