@@ -81,7 +81,7 @@ class TwitterListener(StreamListener):
 def main():
     parser = argparse.ArgumentParser(
         description='MosaicMe Twitter Collector. Listens on a hashtag and extracts the tweeted images.')
-    parser.add_argument('-t', '--hashtag', help='Hashtag', required=True)
+    parser.add_argument('-t', '--hashtag', help='List of comma-separated hashtags', required=True)
     parser.add_argument('-b', '--bucket', help='Bucket', required=True)
     parser.add_argument('-q', '--queue',
                         help='Queue. If provided, it will send a message with the filename to the given queue',
@@ -90,6 +90,9 @@ def main():
                         help='Path to the Dotenv file. If not provided, it will try to get it from the base directory.',
                         required=False)
     args = parser.parse_args()
+
+    hashtags = args.hashtag.split(",")
+    hashtags = map(lambda x: '#'+x, hashtags)
 
     if args.config:
         config_path = args.config
@@ -167,7 +170,7 @@ def main():
     logger.info('Listening to hashtag #{}'.format(args.hashtag))
 
     stream = Stream(auth, l)
-    stream.filter(track=['#{}'.format(args.hashtag)])
+    stream.filter(track=hashtags)
 
 
 if __name__ == "__main__":

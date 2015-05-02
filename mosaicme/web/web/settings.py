@@ -98,8 +98,8 @@ S3_SECRET_KEY = os.environ['S3_SECRET_KEY']
 S3_HTTPS = json.loads(os.environ['S3_HTTPS'].lower())
 
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_HOST = os.environ['REDIS_HOST']
+REDIS_PORT = int(os.environ['REDIS_PORT'])
+REDIS_DB = int(os.environ['REDIS_DB'])
 
 CACHE_LIFE = 600
