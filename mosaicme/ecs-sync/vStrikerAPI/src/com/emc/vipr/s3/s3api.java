@@ -156,7 +156,7 @@ public class s3api {
 
 	public static void CreateLargeObject(String S3_ACCESS_KEY_ID,
 									String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,
-									String S3_BUCKET, String key, File file) throws Exception {
+									String S3_BUCKET, String key, File file,String metaKey,String metaValue) throws Exception {
 
 		System.out.println("Access ID:"+S3_ACCESS_KEY_ID);
 		System.out.println("Access secret:"+S3_SECRET_KEY);
@@ -168,7 +168,12 @@ public class s3api {
 		ViPRS3Client s3 = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
 				S3_ENDPOINT, S3_ViPR_NAMESPACE);
 
-			InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(S3_BUCKET, key);
+		ObjectMetadata objmeta = new ObjectMetadata();
+		if(metaKey.equals("") && metaValue.equals("")) {
+
+			objmeta.addUserMetadata(metaKey, metaValue);
+		}
+			InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(S3_BUCKET, key).withObjectMetadata(objmeta);
 			InitiateMultipartUploadResult initResponse =s3.initiateMultipartUpload(initRequest);
 			long partSize = 1 * 1024 * 1024; // Set part size to 1 MB.
 			// list of UploadPartResponse objects for each part that is uploaded

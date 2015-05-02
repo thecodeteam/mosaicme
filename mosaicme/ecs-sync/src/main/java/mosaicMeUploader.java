@@ -173,7 +173,7 @@ public class mosaicMeUploader  extends Thread{
             FileInputStream fis = new FileInputStream(filelarge);
             File f = new File(filelarge);
 
-            s3api.CreateLargeObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_LARGE_BUCKET,largeimage, f);
+            s3api.CreateLargeObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_LARGE_BUCKET,largeimage, f,"username", user);
 
             generatePresignedUrlRequest =
                     new GeneratePresignedUrlRequest(MOSAIC_OUT_LARGE_BUCKET, largeimage);
