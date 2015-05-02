@@ -13,9 +13,6 @@ import json
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-import dotenv
-dotenv.read_dotenv(os.path.join(BASE_DIR, '..', '..', '.env'))
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
@@ -23,11 +20,11 @@ dotenv.read_dotenv(os.path.join(BASE_DIR, '..', '..', '.env'))
 SECRET_KEY = 'uw_@0y%4aft)gt=)%-eq#%mos!3pj@4m0db*(s95ay%f&2($pm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "104.45.211.42", ".mosaicme.emccode.com"]
 
 
 # Application definition
