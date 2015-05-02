@@ -41,11 +41,11 @@ public class s3api {
 		BasicAWSCredentials creds = new BasicAWSCredentials(S3_ACCESS_KEY_ID,
 				S3_SECRET_KEY);
 		S3ClientOptions opt = new S3ClientOptions();
-		//opt.setPathStyleAccess(true);
+		opt.setPathStyleAccess(true);
 		ViPRS3Client client = new ViPRS3Client(S3_ENDPOINT, creds);
 
 
-		//client.setS3ClientOptions(opt);
+		client.setS3ClientOptions(opt);
 		if (S3_ViPR_NAMESPACE != null) {
 			client.setNamespace(S3_ViPR_NAMESPACE);
 		}
