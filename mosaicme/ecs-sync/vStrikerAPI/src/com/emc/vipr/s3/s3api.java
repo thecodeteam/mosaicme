@@ -19,30 +19,19 @@ import java.util.List;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.S3ClientOptions;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 
 import com.emc.vipr.services.s3.ViPRS3Client;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
-import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
-import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
-import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
-import com.amazonaws.services.s3.model.PartETag;
-import com.amazonaws.services.s3.model.UploadPartRequest;
 
 public class s3api {
 
@@ -52,11 +41,11 @@ public class s3api {
 		BasicAWSCredentials creds = new BasicAWSCredentials(S3_ACCESS_KEY_ID,
 				S3_SECRET_KEY);
 		S3ClientOptions opt = new S3ClientOptions();
-		opt.setPathStyleAccess(true);
+		//opt.setPathStyleAccess(true);
 		ViPRS3Client client = new ViPRS3Client(S3_ENDPOINT, creds);
 
 
-		client.setS3ClientOptions(opt);
+		//client.setS3ClientOptions(opt);
 		if (S3_ViPR_NAMESPACE != null) {
 			client.setNamespace(S3_ViPR_NAMESPACE);
 		}
@@ -115,6 +104,30 @@ public class s3api {
 	}
 
 	/********************************* Object Operations ******************************/
+	public static void CreateObjectWithMeta(String S3_ACCESS_KEY_ID,
+									String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,
+									String S3_BUCKET, String key, InputStream content,String metaKey,String metaValue) throws Exception {
+
+		System.out.println("Access ID:"+S3_ACCESS_KEY_ID);
+		System.out.println("Access secret:"+S3_SECRET_KEY);
+		System.out.println("Access URL:"+S3_ENDPOINT);
+		System.out.println("Access namespace:" + S3_ViPR_NAMESPACE);
+		System.out.println("Access bucket:"+S3_BUCKET);
+		System.out.println("Access key:"+key);
+
+		ViPRS3Client s3 = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
+				S3_ENDPOINT, S3_ViPR_NAMESPACE);
+		// create the object in the demo bucket
+		if(metaKey.equals("") && metaValue.equals("")) {
+			ObjectMetadata obj = new ObjectMetadata();
+			obj.addUserMetadata(metaKey,metaValue);
+			s3.putObject(S3_BUCKET, key, content, null);
+		}
+		else
+			s3.putObject(S3_BUCKET, key, content, null);
+
+	}
+
 	public static void CreateObject(String S3_ACCESS_KEY_ID,
 			String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,
 			String S3_BUCKET, String key, InputStream content) throws Exception {
@@ -130,8 +143,8 @@ public class s3api {
 				S3_ENDPOINT, S3_ViPR_NAMESPACE);
 		// create the object in the demo bucket
 
-
 			s3.putObject(S3_BUCKET, key, content, null);
+
 		}
 
 

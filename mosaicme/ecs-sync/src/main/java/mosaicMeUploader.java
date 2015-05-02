@@ -151,7 +151,7 @@ public class mosaicMeUploader  extends Thread{
 
 
             FileInputStream fis2 = new FileInputStream(filesmall);
-            s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_SMALL_BUCKET,smallimage, fis2);
+            s3api.CreateObjectWithMeta(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, MOSAIC_OUT_SMALL_BUCKET, smallimage, fis2, "username", user);
 
 
 
@@ -220,7 +220,8 @@ public class mosaicMeUploader  extends Thread{
             //Instantiate and initialize a new twitter status update
             //String msg="http://10.243.188.101:10101/mosaic-outlarge/mosaic-penguins.jpg?Signature=vNXXsGWjFRIxFqssKYB1hqXHqv4%3D&AWSAccessKeyId=wuser1%40sanity.local&Expires=1431224053";
 
-            StatusUpdate statusUpdate = new StatusUpdate("@"+tweetuser+" "+TWITTER_TEXT+" - "+shortenURL(largeurl));
+            String sts=String.format(TWITTER_TEXT, tweetuser, shortenURL(largeurl));
+            StatusUpdate statusUpdate = new StatusUpdate(sts);
             //attach any media, if you want to
             statusUpdate.setMedia("", new URL(smallurl).openStream());
             Status status = twitter.updateStatus(statusUpdate);

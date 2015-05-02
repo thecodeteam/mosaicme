@@ -131,7 +131,7 @@ public class emcWorldDownloader  extends Thread{
                 // Uploda the file to emcworld bucket
                 System.out.println("Upload file to emcworld bucket " + obj.getKey());
                 vLogger.LogInfo("emcWorldDownloader:PhotoBooth: Upload file to emcworld bucket " + obj.getKey());
-                s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,S3_BUCKET,obj.getKey(), in);
+                s3api.CreateObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,S3_BUCKET,obj.getKey(),null);
             }
 
         }
