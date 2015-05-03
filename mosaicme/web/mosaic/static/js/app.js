@@ -106,22 +106,40 @@ mosaicmeApp
             $log.log('Page changed to: ' + $scope.currentPage);
 
             var start = ($scope.currentPage - 1) * $scope.itemsPerPage;
-            $scope.displayImages = $scope.allImages.slice(start, start + $scope.itemsPerPage);
+            $scope.displayImages = $scope.currentMosaics.slice(start, start + $scope.itemsPerPage);
         };
 
         $scope.currentPage = 1;
         $scope.itemsPerPage = 8;
 
+        $scope.loadMosaics = function() {
+            $log.debug('Loading new mosaics')
+            $scope.currentMosaicCount = $scope.newMosaicCount;
+            $scope.currentMosaics = $scope.newMosaics;
+            $scope.currentMosaics = orderBy($scope.currentMosaics, '-date', false);
+            $scope.latestMosaics = $scope.currentMosaics.slice(0, 5);
+            
+        };
+
         $scope.loadPromise = $http.get('/mosaic').
             success(function (data, status, headers, config) {
-                $scope.allImages = data['mosaics'];
-                $scope.allImages = orderBy($scope.allImages, '-date', false);
 
-                $scope.latestImages = $scope.allImages.slice(0, 5);
-                $scope.totalItems = data['size'];
+                $log.debug('Loading mosaics');
 
-                $scope.loaded = true;
-                $scope.pageChanged();
+                $scope.newMosaicCount = data['size'];
+                $scope.newMosaics = data['mosaics'];
+
+                if ($scope.currentMosaicCount == null) {
+                    $log.debug('First time to load mosaics');
+                    $scope.currentMosaicCount = data['size'];
+                    $scope.currentMosaics = data['mosaics'];
+                    $scope.currentMosaics = orderBy($scope.currentMosaics, '-date', false);
+                    $scope.latestMosaics = $scope.currentMosaics.slice(0, 5);
+
+                    $scope.loaded = true;
+                    $scope.pageChanged();
+                }
+
             }).
             error(function (data, status, headers, config) {
                 alert('Error getting images!');
