@@ -92,9 +92,13 @@ mosaicmeApp
             };
         }
     ])
-    .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
+    .controller('MainCtrl', ['$scope', '$http', '$log', '$filter', function ($scope, $http, $log, $filter) {
 
-        twttr.widgets.load();
+        var orderBy = $filter('orderBy');
+
+        if (typeof twttr != 'undefined') {
+            twttr.widgets.load();
+        }
 
         $scope.carouselInterval = 3000;
 
@@ -111,6 +115,8 @@ mosaicmeApp
         $scope.loadPromise = $http.get('/mosaic').
             success(function (data, status, headers, config) {
                 $scope.allImages = data['mosaics'];
+                $scope.allImages = orderBy($scope.allImages, '-date', false);
+
                 $scope.latestImages = $scope.allImages.slice(0, 5);
                 $scope.totalItems = data['size'];
 
