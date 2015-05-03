@@ -94,6 +94,8 @@ mosaicmeApp
     ])
     .controller('MainCtrl', ['$scope', '$http', '$log', function ($scope, $http, $log) {
 
+        twttr.widgets.load();
+
         $scope.carouselInterval = 3000;
 
         $scope.pageChanged = function () {

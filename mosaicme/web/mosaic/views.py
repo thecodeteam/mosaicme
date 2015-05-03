@@ -44,9 +44,9 @@ def mosaic_list(request):
 
         mosaic = dict()
         mosaic['id'] = key.name
-        mosaic['url_small'] = 'https:' + url_small
-        mosaic['url_large'] = 'https:' + url_large
-        mosaic['username'] = 'EMCcorp'
+        mosaic['url_small'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_small)
+        mosaic['url_large'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_large)
+        mosaic['username'] = 'EMCcorp' #TODO: get the real one
         mosaic['date'] = key.last_modified
 
         r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
@@ -88,9 +88,9 @@ def mosaic_detail(request, mosaic_id):
 
     mosaic = dict()
     mosaic['id'] = mosaic_id
-    mosaic['url_small'] = 'https:' + url_small
-    mosaic['url_large'] = 'https:' + url_large
-    mosaic['username'] = 'EMCcorp'
+    mosaic['url_small'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_small)
+    mosaic['url_large'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_large)
+    mosaic['username'] = 'EMCcorp' #TODO: get the real one
     mosaic['date'] = key_large.last_modified
 
     r.set('mosaic:{}'.format(mosaic_id), json.dumps(mosaic))
