@@ -42,11 +42,16 @@ def mosaic_list(request):
         url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=key.name)
         url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=key.name)
 
+        if key.metadata and 'username' in key.metadata:
+            username = key.metadata['username']
+        else:
+            username = 'DevOpsEMC'
+
         mosaic = dict()
         mosaic['id'] = key.name
-        mosaic['url_small'] = 'https:' + url_small
-        mosaic['url_large'] = 'https:' + url_large
-        mosaic['username'] = 'EMCcorp'
+        mosaic['url_small'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_small)
+        mosaic['url_large'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_large)
+        mosaic['username'] = username
         mosaic['date'] = key.last_modified
 
         r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
@@ -86,11 +91,16 @@ def mosaic_detail(request, mosaic_id):
     url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=mosaic_id)
     url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=mosaic_id)
 
+    if key_small.metadata and 'username' in key_small.metadata:
+        username = key_small.metadata['username']
+    else:
+        username = 'DevOpsEMC'
+
     mosaic = dict()
     mosaic['id'] = mosaic_id
-    mosaic['url_small'] = 'https:' + url_small
-    mosaic['url_large'] = 'https:' + url_large
-    mosaic['username'] = 'EMCcorp'
+    mosaic['url_small'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_small)
+    mosaic['url_large'] = '{}:{}'.format(settings.S3_HTTP_PROTOCOL, url_large)
+    mosaic['username'] = username
     mosaic['date'] = key_large.last_modified
 
     r.set('mosaic:{}'.format(mosaic_id), json.dumps(mosaic))

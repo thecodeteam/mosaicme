@@ -2,7 +2,7 @@
     <div class="jumbotron">
         <div class="container">
             <div class="row">
-                <div class="col-md-10 col-sm-10">
+                <div class="col-md-8 col-sm-8">
                     <p>
                         <strong>MosaicMe</strong> is a microservice application that retrieves images from selected
                         Twitter feeds, stores them on an object store, and then it processes them to
@@ -12,8 +12,9 @@
                         <a class="btn btn-primary btn-lg" href="#/learn-more" role="button">Learn more »</a>
                     </p>
                 </div>
-                <div class="col-md-2 col-sm-2">
-                    <img class="img-responsive" src="http://emccode.github.io/images/badge.png">
+                <div class="col-md-4 col-sm-4">
+                    <a class="twitter-timeline" href="https://twitter.com/hashtag/devopsemc" data-widget-id="594304214995701760" height="250">#devopsemc Tweets</a>
+                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
                 </div>
             </div>
         </div>
@@ -25,7 +26,7 @@
                 <h3>Latest mosaics</h3>
 
                 <carousel interval="carouselInterval">
-                    <slide ng-repeat="image in latestImages" active="slide.active">
+                    <slide ng-repeat="image in latestMosaics" active="slide.active">
                         <a href="#/mosaic/{{ image.id }}">
                             <img class="mosaic-carousel" ng-src="{{ image.url_small }}">
 
@@ -42,6 +43,12 @@
     <div class="container top-buffer">
         <div class="row" ng-show="loaded">
             <h3>Mosaic gallery</h3>
+
+            <a href="" ng-click="loadMosaics()" ng-hide="newMosaicCount == currentMosaicCount">
+                <div id="new-mosaics-alert" class="alert alert-dismissible alert-info top-buffer text-center">
+                    <strong>New mosaics!</strong> Click here to reload
+                </div>
+            </a>
 
             <div ng-repeat="image in displayImages" class="col-lg-3 col-md-4 col-xs-6 text-center top-buffer">
                 <a class="thumbnail" href="#/mosaic/{{ image.id }}">

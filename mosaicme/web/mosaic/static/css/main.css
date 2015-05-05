@@ -47,3 +47,8 @@
 .thumbnail-container img.tall {
     max-width: 100%;
 }
+
+.site-logo img {
+    height: 40px;
+    margin-top: -7px;
+}

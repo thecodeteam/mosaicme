@@ -46,6 +46,7 @@ def main():
         s3_host = os.environ['S3_HOST']
         s3_port = int(os.environ['S3_PORT'])
         s3_is_secure = json.loads(os.environ['S3_HTTPS'].lower())
+        s3_http_proto = 'https' if s3_is_secure else 'http'
 
         redis_host = os.environ['REDIS_HOST']
         redis_port = int(os.environ['REDIS_PORT'])
@@ -106,9 +107,9 @@ def main():
 
             mosaic = dict()
             mosaic['id'] = key.name
-            mosaic['url_small'] = 'https:' + url_small
-            mosaic['url_large'] = 'https:' + url_large
-            mosaic['username'] = 'EMCcorp'
+            mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
+            mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
+            mosaic['username'] = 'EMCcorp' # TODO: fix it
             mosaic['date'] = key.last_modified
             r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
             data['mosaics'].append(mosaic)

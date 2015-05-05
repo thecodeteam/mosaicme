@@ -62,3 +62,6 @@ target/
 
 # JetBrains IDE
 .idea/
+
+# Static folder
+/mosaicme/web/static/

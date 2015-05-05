@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 import os
 import sys
+import dotenv
+
 
 if __name__ == "__main__":
+
+    try:
+        dotenv.read_dotenv(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', '.env'))
+    except Exception as e:
+        print(e)
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
 
