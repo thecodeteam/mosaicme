@@ -52,7 +52,7 @@ public class mosaicMeUploader  extends Thread{
 
     public String BIT_LY_LOGIN = "";
     public String BIT_LY_KEY_API = "";
-
+    public String MOSAIC_WEB="";
     public void run() {
         try {
 
@@ -97,6 +97,7 @@ public class mosaicMeUploader  extends Thread{
             BIT_LY_KEY_API=prop.getProperty("bitlyapikey");
             BIT_LY_LOGIN=prop.getProperty("bitlylogin");
 
+            MOSAIC_WEB=prop.getProperty("mosaicweb");
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(QUEUE_HOST_NAME);
@@ -181,6 +182,7 @@ public class mosaicMeUploader  extends Thread{
 
             URL largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
 
+            largeurl=new URL(MOSAIC_WEB+image);
             putMessge(smallurl.toString(),largeurl.toString(),user);
 
             //Delete Files
