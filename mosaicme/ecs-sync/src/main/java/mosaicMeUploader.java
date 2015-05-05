@@ -134,7 +134,6 @@ public class mosaicMeUploader  extends Thread{
 
     public void uploadImage(String msg) {
         try {
-            System.out.println(" Download Image '" + msg + "'");
             vLogger.LogInfo("mosaicMeUploader:  Download Image '" + msg + "'");
 
             System.out.println(" Download Image '" + msg + "'");

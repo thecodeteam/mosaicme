@@ -119,12 +119,14 @@ public class s3api {
 				S3_ENDPOINT, S3_ViPR_NAMESPACE);
 		// create the object in the demo bucket
 		if(metaKey.equals("") && metaValue.equals("")) {
-			ObjectMetadata obj = new ObjectMetadata();
-			obj.addUserMetadata(metaKey,metaValue);
+
 			s3.putObject(S3_BUCKET, key, content, null);
 		}
-		else
-			s3.putObject(S3_BUCKET, key, content, null);
+		else {
+			ObjectMetadata obj = new ObjectMetadata();
+			obj.addUserMetadata(metaKey,metaValue);
+				s3.putObject(S3_BUCKET, key, content, obj);
+		}
 
 	}
 
@@ -169,7 +171,7 @@ public class s3api {
 				S3_ENDPOINT, S3_ViPR_NAMESPACE);
 
 		ObjectMetadata objmeta = new ObjectMetadata();
-		if(metaKey.equals("") && metaValue.equals("")) {
+		if(!(metaKey.equals("") && metaValue.equals(""))) {
 
 			objmeta.addUserMetadata(metaKey, metaValue);
 		}
