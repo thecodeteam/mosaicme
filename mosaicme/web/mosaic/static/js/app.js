@@ -110,7 +110,7 @@ mosaicmeApp
         };
 
         $scope.currentPage = 1;
-        $scope.itemsPerPage = 8;
+        $scope.itemsPerPage = 12;
 
         $scope.loadMosaics = function() {
             $log.debug('Loading new mosaics')

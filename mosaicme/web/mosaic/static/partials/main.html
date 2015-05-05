@@ -56,12 +56,14 @@
                         <img class="" ng-src="{{ image.url_small }}" alt="" on-thumbnail-loaded>
                     </div>
                 </a>
-                <p>Sent by <a target="_blank" href="http://twitter.com/{{ image.username }}">@{{ image.username }}</a> <span am-time-ago="image.date"></span></p>
+                <div class="caption">
+                    <p>Sent by <a target="_blank" href="http://twitter.com/{{ image.username }}">@{{ image.username }}</a> <span am-time-ago="image.date"></span></p>
+                </div>
             </div>
         </div>
 
         <div class="col-lg-12 text-center" ng-show="loaded">
-            <pagination total-items="totalItems" ng-model="currentPage" items-per-page="itemsPerPage"
+            <pagination total-items="currentMosaicCount" ng-model="currentPage" items-per-page="itemsPerPage"
                         ng-change="pageChanged()" boundary-links="true" rotate="false" num-pages="numPages"></pagination>
         </div>
     </div>

@@ -12,7 +12,7 @@ import redis
 import time
 
 
-WAIT_TIME = 30  # in seconds
+WAIT_TIME = 60  # in seconds
 CACHE_LIFE = 600  # in seconds
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -105,11 +105,17 @@ def main():
             url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=key.name)
             url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=key.name)
 
+            key_sm = bucket_small.get_key(key.name)
+
+            username = key_sm.get_metadata('username')
+            if not username:
+                username = 'DevOpsEMC'
+
             mosaic = dict()
             mosaic['id'] = key.name
             mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
             mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
-            mosaic['username'] = 'EMCcorp' # TODO: fix it
+            mosaic['username'] = username
             mosaic['date'] = key.last_modified
             r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
             data['mosaics'].append(mosaic)

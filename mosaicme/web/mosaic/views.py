@@ -39,12 +39,13 @@ def mosaic_list(request):
         if key not in bucket_large:
             continue
 
+        key_sm = bucket_small.get_key(key.name)
+
         url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=key.name)
         url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=key.name)
 
-        if key.metadata and 'username' in key.metadata:
-            username = key.metadata['username']
-        else:
+        username = key_sm.get_metadata('username')
+        if not username:
             username = 'DevOpsEMC'
 
         mosaic = dict()
@@ -91,9 +92,8 @@ def mosaic_detail(request, mosaic_id):
     url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=mosaic_id)
     url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=mosaic_id)
 
-    if key_small.metadata and 'username' in key_small.metadata:
-        username = key_small.metadata['username']
-    else:
+    username = key_small.get_metadata('username')
+    if not username:
         username = 'DevOpsEMC'
 
     mosaic = dict()
