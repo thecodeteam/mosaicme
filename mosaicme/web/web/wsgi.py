@@ -12,7 +12,7 @@ import dotenv
 
 try:
     dotenv.read_dotenv(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', '..', '.env'))
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), '..', 'config', '.env'))
 except Exception as e:
     print(e)
 

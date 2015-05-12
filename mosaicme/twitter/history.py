@@ -4,11 +4,11 @@ import json
 import logging
 import logging.config
 import os
-import dotenv
 import sys
+
+import dotenv
 import boto
 from boto.s3.connection import S3Connection
-
 import tweepy
 from tweepy import OAuthHandler
 
@@ -33,7 +33,7 @@ def main():
     if args.config:
         config_path = args.config
     else:
-        config_path = os.path.join(BASE_DIR, '..', '.env')
+        config_path = os.path.join(BASE_DIR, '../../', '.env')
 
     if not os.path.exists(config_path):
         logger.error('Config file not found at {}'.format(config_path))

@@ -1,41 +1,96 @@
-
 <div class="container">
     <div class="row">
         <div class="col-md-12">
             <h2>Introduction</h2>
 
-            <p>
-                MosaicMe is a Microservice application that retrieves images from selected Twitter feeds, stores them on an object store, and then it process them to build a mosaic based on a selected set of pictures.
-            </p>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p>
+                        MosaicMe is a Microservice application that retrieves images from selected Twitter feeds, stores
+                        them on an object store, and then it process them to build a mosaic based on a selected set of
+                        pictures.
+                    </p>
 
-            <p>
-                Mosaicme's goal is to provide developers with working example in how to build a distributed microservice application using best practices. The application includes the following:
-            </p>
+                    <p>
+                        MosaicMe's goal is to provide developers with working example in how to build a distributed
+                        microservice application using best practices. The application includes the following:
+                    </p>
 
-            <ul>
-                <li>Use of Linux containers to host each service.</li>
-                <li>Use of Object stores.</li>
-                <li>Restful APIs as communication Channel (REST, S3, SWIFT, HDFS)</li>
-                <li>Use of External Services like Twitter and Twilio)</li>
-                <li>Automated deployment model</li>
-                <li>Use of a Logging Router</li>
-                <li>Use of Queuing, Caching and Configuration Services</li>
-                <li>Use of Haddop to calculate statistics</li>
-                <li>Use of Puppet/Chef to deploy the application</li>
-            </ul>
+                    <ul>
+                        <li>Use of Docker containers to host each service</li>
+                        <li>Use of an Object Store</li>
+                        <li>Restful APIs as communication channel (S3, SWIFT, ECS)</li>
+                        <li>Use of External Services like Twitter or Bitly</li>
+                        <li>Automated deployment model</li>
+                        <li>Use of a Logging Router</li>
+                        <li>Use of Queuing, Caching and Configuration Services</li>
+                        <li>Use of Hadoop to calculate statistics</li>
+                        <li>Use of Puppet/Chef for provisioning</li>
+                    </ul>
+                </div>
+            </div>
 
 
             <h2>Architecture</h2>
 
-            <p>
-                Mosaicme is composed of multiple tiers. The following design shows the high level application architecture: The following diagram shows Mosaicme high level architecture:
-            </p>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p>
+                        MosaicMe is composed of multiple tiers. The following diagram shows the high level application
+                        architecture with all the different components and the interactions among them.
+                    </p>
 
-            <img class="img-responsive top-buffer" src="/static/images/mosaic_01.jpg">
-            <img class="img-responsive top-buffer" src="/static/images/mosaic_02.jpg">
-            <img class="img-responsive top-buffer" src="/static/images/mosaic_04.jpg">
-            <img class="img-responsive top-buffer" src="/static/images/mosaic_05.jpg">
-            <img class="img-responsive top-buffer" src="/static/images/mosaic_06.jpg">
+                    <img class="img-responsive top-buffer" src="/static/images/mosaic_01.jpg">
+                </div>
+            </div>
+
+            <h2>Components</h2>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <div class="panel panel-primary">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Twitter retrieval service</h3>
+                      </div>
+                      <div class="panel-body">
+                        <p>Service that retrieves pictures and their meta data from the selected twitter accounts and adds them Object store.</p>
+                      </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Queuing Service</h3>
+                      </div>
+                      <div class="panel-body">
+                        <p>Service in charge of allowing communication between all the different components. Each one is listening to a particular queue to get its tasks and publishes the result to another queue for the next component.</p>
+                      </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Web Interface</h3>
+                      </div>
+                      <div class="panel-body">
+                        <p>Web Interface to for displaying pictures, mosaics, statistics and system configuration.</p>
+                      </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading">
+                        <h3 class="panel-title">Mosaic processing service</h3>
+                      </div>
+                      <div class="panel-body">
+                        <p>It takes the mosaic generation request from the Twitter Retrieval Service and generates the mosaic data and metadata from .</p>
+                      </div>
+                    </div>
+
+                    <img class="img-responsive top-buffer" src="/static/images/mosaic_02.jpg">
+                    <img class="img-responsive top-buffer" src="/static/images/mosaic_04.jpg">
+
+                    <img class="img-responsive top-buffer" src="/static/images/mosaic_06.jpg">
+                </div>
+            </div>
         </div>
     </div>
 </div>

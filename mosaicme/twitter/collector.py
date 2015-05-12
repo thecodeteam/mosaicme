@@ -1,21 +1,14 @@
 from __future__ import absolute_import, print_function
 import argparse
-import signal
+
 from boto.s3.connection import S3Connection
 import boto
 import pika
-
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-import getpass
-print('Username:', getpass.getuser())
-
-import os
-print('PYTHONPATH: ', os.environ['PYTHONPATH'])
-
-from mosaicme.async.tasks import upload_image
+from mosaicme.twitter.tasks import process_image
 
 import json
 import logging
@@ -71,7 +64,7 @@ class TwitterListener(StreamListener):
             media_url = media['media_url']
             media_id = media['id_str']
             logger.info('[Tweet] Media found. ID: %s - URL: %s', media_id, media_url)
-            upload_image.delay(media_id, media_url, twitter_user, self.bucket, self.s3_credentials, self.rmq_credentials, queue=self.queue)
+            process_image.delay(media_id, media_url, twitter_user, self.bucket, self.s3_credentials, self.rmq_credentials, queue=self.queue)
         return True
 
     def on_error(self, status):

@@ -20,9 +20,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'uw_@0y%4aft)gt=)%-eq#%mos!3pj@4m0db*(s95ay%f&2($pm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-TEMPLATE_DEBUG = False
+TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "104.45.211.42", ".mosaicme.emccode.com"]
 
@@ -97,6 +97,8 @@ S3_PORT = int(os.environ['S3_PORT'])
 S3_ACCESS_KEY = os.environ['S3_ACCESS_KEY']
 S3_SECRET_KEY = os.environ['S3_SECRET_KEY']
 S3_HTTPS = json.loads(os.environ['S3_HTTPS'].lower())
+
+S3_HTTP_PROTOCOL = 'https' if S3_HTTPS else 'http'
 
 
 REDIS_HOST = os.environ['REDIS_HOST']
