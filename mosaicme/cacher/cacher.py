@@ -12,11 +12,12 @@ import redis
 import time
 
 
-WAIT_TIME = 60  # in seconds
-CACHE_LIFE = 600  # in seconds
+WAIT_TIME = os.getenv('WAIT_TIME', 60)  # in seconds
+CACHE_LIFE = os.getenv('CACHE_LIFE', 600)  # in seconds
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -24,14 +25,14 @@ def main():
     parser = argparse.ArgumentParser(
         description='MosaicMe Cacher. Lists the buckets "mosaic-outlarge" and "mosaic-outsmall", generates a JSON object and stores it on the Redis cache to be consumed by the Web app.')
     parser.add_argument('-c', '--config',
-                        help='Path to the Dotenv file. If not provided, it will try to get it from the base directory.',
+                        help='Path to the Dotenv file. If not provided, it will try to get it from the "config" directory.',
                         required=False)
     args = parser.parse_args()
 
     if args.config:
         config_path = args.config
     else:
-        config_path = os.path.join(BASE_DIR, '..', '.env')
+        config_path = os.path.join(BASE_DIR, 'config', '.env')
 
     if not os.path.exists(config_path):
         logger.error('Config file not found at {}'.format(config_path))
@@ -86,6 +87,8 @@ def main():
     logger.info('Connection with Redis verified successfully')
 
     while True:
+        logger.info('Sleeping for {} seconds'.format(WAIT_TIME))
+        time.sleep(WAIT_TIME)
         logger.info('Getting keys from object store...')
 
         try:
@@ -93,7 +96,7 @@ def main():
             bucket_large = s3_conn.get_bucket('mosaic-outlarge')
         except boto.exception.S3ResponseError, e:
             logger.error("Could not get bucket.")
-            sys.exit(7)
+            continue
 
         data = dict()
         data['mosaics'] = []
@@ -105,7 +108,11 @@ def main():
             url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=key.name)
             url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=key.name)
 
-            key_sm = bucket_small.get_key(key.name)
+            try:
+                key_sm = bucket_small.get_key(key.name)
+            except:
+                logger.error("Could not get key '%s'" % (key.name, ))
+                continue
 
             username = key_sm.get_metadata('username')
             if not username:
@@ -121,11 +128,13 @@ def main():
             data['mosaics'].append(mosaic)
 
         data['size'] = len(data['mosaics'])
-        r.set('mosaic:all', json.dumps(data), ex=CACHE_LIFE)
+        try:
+            r.set('mosaic:all', json.dumps(data), ex=CACHE_LIFE)
+        except:
+            logger.error("Could not save mosaics into Redis")
+            continue
 
         logger.info('Cached {} mosaics'.format(data['size']))
-        logger.info('Sleeping for {} seconds'.format(WAIT_TIME))
-        time.sleep(WAIT_TIME)
 
 
 if __name__ == "__main__":
