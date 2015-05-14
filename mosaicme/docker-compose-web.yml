@@ -1,0 +1,18 @@
+web:
+  image: emccode/mosaicme-web
+  links:
+   - redis
+  ports:
+   - "0.0.0.0:80:80"
+  volumes:
+   - /path/to/config:/app/config
+
+cacher:
+  image: emccode/mosaicme-cacher
+  links:
+   - redis
+  volumes-from:
+   - web
+
+redis:
+  image: redis

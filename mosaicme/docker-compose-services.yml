@@ -1,0 +1,28 @@
+# rawcollector:
+#   image: emccode/mosaicme-collector
+#   links:
+#     - rabbit
+#   env_file: .env
+#   environment:
+#     - LISTEN_HASHTAG=openstacksummit
+#     - S3_BUCKET=openstack
+
+mosaiccollector:
+  image: emccode/mosaicme-collector
+  links:
+    - rabbit
+  env_file: .env
+  environment:
+    - MOSAIC_LISTEN_HASHTAG=mosaicme
+    - MOSAIC_BUCKET=mosaic-in
+    - MOSAIC_QUEUE=mosaic-in
+
+# celeryworker:
+#   image: emccode/mosaicme-celery
+#   links:
+#     - rabbit
+#
+rabbit:
+  image: rabbitmq
+  environment:
+    - RABBITMQ_NODENAME=my-rabbit

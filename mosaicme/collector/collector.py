@@ -8,7 +8,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 
-from mosaicme.twitter.tasks import process_image
+from tasks import process_image
 
 import json
 import logging
@@ -19,7 +19,8 @@ import sys
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -74,30 +75,43 @@ class TwitterListener(StreamListener):
 def main():
     parser = argparse.ArgumentParser(
         description='MosaicMe Twitter Collector. Listens on a hashtag and extracts the tweeted images.')
-    parser.add_argument('-t', '--hashtag', help='List of comma-separated hashtags', required=True)
-    parser.add_argument('-b', '--bucket', help='Bucket', required=True)
+    parser.add_argument('-t', '--hashtag', help='List of comma-separated hashtags. Overwritten by MOSAIC_LISTEN_HASHTAG environment variable if present.', required=False)
+    parser.add_argument('-b', '--bucket', help='Bucket.  Overwritten by MOSAIC_BUCKET environment variable if present', required=False)
     parser.add_argument('-q', '--queue',
-                        help='Queue. If provided, it will send a message with the filename to the given queue',
+                        help='Queue. If provided, it will send a message with the filename to the given queue. Overwritten by MOSAIC_QUEUE environment variable if present.',
                         required=False)
     parser.add_argument('-c', '--config',
-                        help='Path to the Dotenv file. If not provided, it will try to get it from the base directory.',
+                        help='Path to the Dotenv file to load environment variables.',
                         required=False)
     args = parser.parse_args()
 
-    hashtags = args.hashtag.split(",")
+    hashtags = os.getenv('MOSAIC_LISTEN_HASHTAG', args.hashtag)
+    if not hashtags:
+        logger.error('No hashtag provided.')
+        sys.exit(1)
+    hashtags = hashtags.split(",")
     hashtags = map(lambda x: '#'+x, hashtags)
+    logger.info("Hashtags: %r" % (hashtags, ))
+
+    bucket = os.getenv('MOSAIC_BUCKET', args.bucket)
+    if not bucket:
+        logger.error('No bucket provided.')
+        sys.exit(2)
+    logger.info("Bucket: %s" % (bucket, ))
+
+    queue = os.getenv('MOSAIC_QUEUE', args.queue)
+    if queue:
+        logger.info("Queue: %s" % (queue, ))
 
     if args.config:
         config_path = args.config
-    else:
-        config_path = os.path.join(BASE_DIR, '..', '.env')
+        if not os.path.exists(config_path):
+            logger.error('Config file not found at {}'.format(config_path))
+            sys.exit(3)
 
-    if not os.path.exists(config_path):
-        logger.error('Config file not found at {}'.format(config_path))
-        sys.exit(2)
+        logger.info('Reading dotenv file...')
+        dotenv.read_dotenv(config_path)
 
-    logger.info('Reading dotenv file...')
-    dotenv.read_dotenv(config_path)
     try:
         twitter_consumer_key = os.environ['TWITTER_CONSUMER_KEY']
         twitter_consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
@@ -111,18 +125,18 @@ def main():
         s3_port = int(os.environ['S3_PORT'])
         s3_is_secure = json.loads(os.environ['S3_HTTPS'].lower())
 
-        rmq_host = os.environ['RABBITMQ_HOST']
+        rmq_host = os.getenv('RABBITMQ_HOST', 'rabbit')
         rmq_port = int(os.environ['RABBITMQ_PORT'])
         rmq_user = os.environ['RABBITMQ_USER']
         rmq_password = os.environ['RABBITMQ_PASSWORD']
     except KeyError, e:
         logger.error('Could not obtain environment variable: %s', str(e))
-        sys.exit(3)
-    except Exception, e:
-        logger.error('Error', e)
         sys.exit(4)
+    except Exception, e:
+        logger.error('Error: %s', str(e))
+        sys.exit(5)
 
-    logger.info('Dotenv variables loaded correctly')
+    logger.info('Env variables loaded correctly')
 
     s3_conn = S3Connection(aws_access_key_id=s3_access_key,
                            aws_secret_access_key=s3_secret_key,
@@ -131,36 +145,36 @@ def main():
                            calling_format='boto.s3.connection.ProtocolIndependentOrdinaryCallingFormat',
                            is_secure=s3_is_secure)
 
-    logger.info('Checking connection with object store...')
+    logger.info('Checking connection with object store (%s:%s)...' % (s3_host, s3_port))
     try:
-        s3_conn.get_bucket(args.bucket)
-    except boto.exception.S3ResponseError, e:
-        logger.error("Could not obtain bucket: %s" % (args.bucket, ), e)
-        sys.exit(5)
+        s3_conn.get_bucket(bucket)
+    except Exception, e:
+        logger.error("Could not obtain bucket: %s. %s" % (bucket, str(e)))
+        sys.exit(6)
 
     logger.info('Connection with object store verified successfully')
 
     s3_credentials = {'host': s3_host, 'port': s3_port, 'is_secure': s3_is_secure, 'access_key': s3_access_key,
                       'secret_key': s3_secret_key}
 
-    logger.info('Checking connection with RabbitMQ...')
+    logger.info('Checking connection with RabbitMQ (%s:%s)...' % (rmq_host, rmq_port))
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=rmq_host, port=rmq_port, credentials=pika.PlainCredentials(rmq_user, rmq_password)))
         connection.close()
     except Exception, e:
-        logger.error('Could not connect to RabbitMQ', e)
-        sys.exit(6)
+        logger.error('Could not connect to RabbitMQ. %s', str(e))
+        sys.exit(7)
     logger.info('Connection with RabbitMQ verified successfully')
 
     rmq_credentials = {'host': rmq_host, 'port': rmq_port, 'user': rmq_user,
                        'password': rmq_password}
 
-    l = TwitterListener(twitter_username, args.bucket, s3_credentials, rmq_credentials, queue=args.queue)
+    l = TwitterListener(twitter_username, bucket, s3_credentials, rmq_credentials, queue=queue)
     auth = OAuthHandler(twitter_consumer_key, twitter_consumer_secret)
     auth.set_access_token(twitter_access_token, twitter_access_token_secret)
 
-    logger.info('Listening to hashtag #{}'.format(args.hashtag))
+    logger.info('Listening to hashtags {}'.format(hashtags))
 
     stream = Stream(auth, l)
     stream.filter(track=hashtags)

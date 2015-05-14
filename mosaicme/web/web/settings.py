@@ -101,8 +101,8 @@ S3_HTTPS = json.loads(os.environ['S3_HTTPS'].lower())
 S3_HTTP_PROTOCOL = 'https' if S3_HTTPS else 'http'
 
 
-REDIS_HOST = os.environ['REDIS_HOST']
-REDIS_PORT = int(os.environ['REDIS_PORT'])
-REDIS_DB = int(os.environ['REDIS_DB'])
+REDIS_HOST = "redis"
+REDIS_PORT = 6379
+REDIS_DB = 0
 
 CACHE_LIFE = 600

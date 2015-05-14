@@ -15,17 +15,16 @@ import time
 from retrying import retry
 
 
-MAX_RETRIES = 3
-
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 TMP_DIR = os.path.join(BASE_DIR, '.imgtmp')
 if not os.path.exists(TMP_DIR):
     os.makedirs(TMP_DIR)
-logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Celery('twitterCollector')
-app.config_from_object('mosaicme.celeryconfig')
+app.config_from_object('config.celeryconfig')
 
 
 @app.task

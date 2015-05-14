@@ -73,7 +73,7 @@ def main():
     try:
         s3_conn.get_bucket("mosaic-outlarge")
     except boto.exception.S3ResponseError:
-        logger.error("Could not obtain bucket: %s", args.bucket)
+        logger.error("Could not obtain bucket: mosaic-outlarge")
         sys.exit(5)
 
     logger.info('Connection with object store verified successfully')
