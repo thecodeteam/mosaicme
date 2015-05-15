@@ -1,4 +1,5 @@
 package com.emc.vipr.swift;
+import java.util.*;
 
 import org.javaswift.joss.client.factory.AccountConfig;
 import org.javaswift.joss.client.factory.AccountFactory;
@@ -28,14 +29,73 @@ public class swiftapi {
 			}
 			return null;
 		}
+   public static void CreateBucket (String username,String passwod,String dataNode, String container)throws Exception
+   {
+	   Account client = ViPRSwiftClient(username, passwod, dataNode);
+	   Container c =client.getContainer(container);
+	   if (!c.exists()) {
+		   c.create();
+		   c.makePublic();
+	   }
 
-		public static void CreateObject(String username,String passwod,String dataNode, String container, String key, InputStream content)throws Exception
+   }
+	public static  Collection<StoredObject> ReadBucket(String username,String passwod,String dataNode, String container)throws Exception
+	{
+		Collection<StoredObject> objs;
+		try{
+			Container myContainer = client.getContainer(container);
+			myContainer.setCount(1);
+				Collection<StoredObject> objects = currentContainer.list();
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("error during creating "+container);
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static void CreateObject(String username,String passwod,String dataNode, String container, String key, InputStream content)throws Exception
+	{
+		try{
+			Account client = ViPRSwiftClient(username, passwod, dataNode);
+			Container myContainer = client.getContainer(container);
+			if (!myContainer.exists()) {
+				myContainer.create();
+				myContainer.makePublic();
+			}
+			StoredObject object = myContainer.getObject(key);
+
+			object.uploadObject(content);
+		}
+		catch(Exception e)
+		{
+			System.out.println("error during creating "+key);
+			e.printStackTrace();
+		}
+
+	}
+		public static void CreateObjectWithMeta(String username,String passwod,String dataNode, String container, String key, InputStream content,String metaKey,String metaValue)throws Exception
 		{
 			try{
 				Account client = ViPRSwiftClient(username, passwod, dataNode);
 				Container myContainer = client.getContainer(container);
+				if (!myContainer.exists()) {
+					myContainer.create();
+					myContainer.makePublic();
+				}
 				StoredObject object = myContainer.getObject(key);
+
 				object.uploadObject(content);
+
+				if(!(metaKey.equals("") && metaValue.equals(""))) {
+					Map<String, Object> metadata = new TreeMap<String, Object>();
+					metadata.put(metaKey, metaValue);
+					object.setMetadata(metadata);
+				}
+
+
 			}
 			catch(Exception e)
 			{
@@ -45,6 +105,32 @@ public class swiftapi {
 
 		}
 
+	public static void CreateLargeObjectWithMeta(String username,String passwod,String dataNode, String container, String key, InputStream content,String metaKey,String metaValue)throws Exception
+	{
+		try{
+			Account client = ViPRSwiftClient(username, passwod, dataNode);
+			Container myContainer = client.getContainer(container);
+			StoredObject object = myContainer.getObject(key);
+			if (!myContainer.exists()) {
+				myContainer.create();
+				myContainer.makePublic();
+			}
+
+			if(!(metaKey.equals("") && metaValue.equals(""))) {
+				Map<String, Object> metadata = new TreeMap<String, Object>();
+				metadata.put(metaKey, metaValue);
+				object.setMetadata(metadata);
+			}
+			object.uploadObject(content);
+
+		}
+		catch(Exception e)
+		{
+			System.out.println("error during creating "+key);
+			e.printStackTrace();
+		}
+
+	}
 		public static InputStream ReadObject(String username,String passwod,String dataNode, String container, String key)throws Exception {
 			try {
 				Account client = ViPRSwiftClient(username, passwod, dataNode);
