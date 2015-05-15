@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-import json
 
+import json
 import logging
 import logging.config
 import os
@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Celery('twitterCollector')
-app.config_from_object('config.celeryconfig')
+app.config_from_object('celeryconfig')
 
 
 @app.task
