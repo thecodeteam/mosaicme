@@ -1,10 +1,5 @@
 #!/bin/sh
 
-if [ ! -f /app/config/.env ]; then
-        echo ".env file not found!"
-        exit 1
-fi
-
 # Collect static files
 python /app/mosaicme-web/manage.py collectstatic --noinput
 
@@ -16,4 +11,4 @@ then
         exit 2
 fi
 
-supervisord -n
+gunicorn --name=mosaicme --bind=0.0.0.0:9000 --workers 3 web.wsgi:application

@@ -31,15 +31,11 @@ def main():
 
     if args.config:
         config_path = args.config
-    else:
-        config_path = os.path.join(BASE_DIR, 'config', '.env')
-
-    if not os.path.exists(config_path):
-        logger.error('Config file not found at {}'.format(config_path))
-        sys.exit(2)
-
-    logger.info('Reading dotenv file...')
-    dotenv.read_dotenv(config_path)
+        if not os.path.exists(config_path):
+            logger.error('Config file not found at {}'.format(config_path))
+            sys.exit(2)
+        logger.info('Reading dotenv file...')
+        dotenv.read_dotenv(config_path)
 
     try:
         s3_access_key = os.environ['S3_ACCESS_KEY']
@@ -60,7 +56,7 @@ def main():
         logger.error('Error', e)
         sys.exit(4)
 
-    logger.info('Dotenv variables loaded correctly')
+    logger.info('Env variables loaded correctly')
 
     s3_conn = S3Connection(aws_access_key_id=s3_access_key,
                            aws_secret_access_key=s3_secret_key,
