@@ -43,10 +43,11 @@ public class swiftapi {
 	{
 		Collection<StoredObject> objs;
 		try{
+			Account client = ViPRSwiftClient(username, passwod, dataNode);
 			Container myContainer = client.getContainer(container);
 			myContainer.setCount(1);
-				Collection<StoredObject> objects = currentContainer.list();
-			}
+			Collection<StoredObject> objects = myContainer.list();
+
 		}
 		catch(Exception e)
 		{

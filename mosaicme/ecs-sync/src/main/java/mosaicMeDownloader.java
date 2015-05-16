@@ -7,6 +7,8 @@ import java.util.Properties;
 import java.util.Date;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.emc.vipr.s3.s3api;
+import com.emc.vipr.swift.*;
+
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
@@ -25,10 +27,14 @@ public class mosaicMeDownloader  extends Thread{
     public String S3_ACCESS_KEY_ID = "";
     public String S3_SECRET_KEY = "";
     public String S3_ENDPOINT = "";
-    public String S3_BUCKET = "";
+    public String MOSAIC_IN_BUCKET = "";
     public String LOCAL_DIR = "";
     public String MOSAIC_IN_DIR = "";
 
+    public String SWIFT_ACCESS_KEY_ID ="";
+    public String SWIFT_SECRET_KEY = "";
+    public String SWIFT_ENDPOINT = "";
+    public String PROTOCOL ="";
 
     public void run() {
         try {
@@ -51,13 +57,18 @@ public class mosaicMeDownloader  extends Thread{
             S3_ACCESS_KEY_ID = prop.getProperty("username");
             S3_SECRET_KEY = prop.getProperty("password");
             S3_ENDPOINT = prop.getProperty("proxy");
-            S3_BUCKET = prop.getProperty("inbucket");
+            MOSAIC_IN_BUCKET = prop.getProperty("inbucket");
+
+            SWIFT_ACCESS_KEY_ID = prop.getProperty("swiftusername");
+            SWIFT_SECRET_KEY = prop.getProperty("swiftpassword");
+            SWIFT_ENDPOINT = prop.getProperty("swiftproxy");
 
             LOCAL_DIR = prop.getProperty("emclocal");
             DOWNLOAD_QUEUE_NAME = prop.getProperty("downloaderQueue");
             ENGINE_QUEUE_NAME = prop.getProperty("engineQueue");
             QUEUE_HOST_NAME = prop.getProperty("queueHost");
             MOSAIC_IN_DIR = prop.getProperty("mosaicin");
+            PROTOCOL=prop.getProperty("objectType");
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(QUEUE_HOST_NAME);
@@ -99,24 +110,48 @@ public class mosaicMeDownloader  extends Thread{
             JSONObject jsonObject = (JSONObject) jsonParser.parse(msg);
             String image = (String) jsonObject.get("media_id") +".jpg";
             vLogger.LogInfo("mosaicMeDownloader: Download image '" + image + "'");
-            S3ObjectInputStream in = s3api.ReadObject(S3_ACCESS_KEY_ID,
-                    S3_SECRET_KEY, S3_ENDPOINT, null,
-                    S3_BUCKET, image);
-
 
             File file = new File(MOSAIC_IN_DIR + image);
-
             int count = 0;
             byte[] buf = new byte[1024];
             OutputStream out = new FileOutputStream(file);
-            while ((count = in.read(buf)) != -1) {
-                if (Thread.interrupted()) {
-                    throw new InterruptedException();
+
+            if(PROTOCOL.equals("S3")) {
+
+                S3ObjectInputStream inS3 = s3api.ReadObject(S3_ACCESS_KEY_ID,
+                        S3_SECRET_KEY, S3_ENDPOINT, null,
+                        MOSAIC_IN_BUCKET, image);
+
+                while ((count = inS3.read(buf)) != -1) {
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
+                    }
+                    out.write(buf, 0, count);
                 }
-                out.write(buf, 0, count);
+                out.close();
+                inS3.close();
             }
-            out.close();
-            in.close();
+            else {
+
+
+                InputStream inSwift = swiftapi.ReadObject(SWIFT_ACCESS_KEY_ID,
+                        SWIFT_SECRET_KEY, SWIFT_ENDPOINT,MOSAIC_IN_BUCKET, image);
+
+                while ((count = inSwift.read(buf)) != -1) {
+                    if (Thread.interrupted()) {
+                        throw new InterruptedException();
+                    }
+                    out.write(buf, 0, count);
+                }
+                out.close();
+                inSwift.close();
+            }
+
+
+
+
+
+
             putMessge(msg);
 
         } catch (Exception e) {

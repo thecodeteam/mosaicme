@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.Date;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.emc.vipr.s3.s3api;
+import com.emc.vipr.swift.*;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
@@ -39,7 +40,9 @@ public class mosaicMeUploader  extends Thread{
     public String LOCAL_DIR = "";
     public String MOSAIC_OUT_LARGE_DIR = "";
     public String MOSAIC_OUT_SMALL_DIR = "";
-
+    public String SWIFT_ACCESS_KEY_ID ="";
+    public String SWIFT_SECRET_KEY = "";
+    public String SWIFT_ENDPOINT = "";
     public String MOSAIC_OUT_LARGE_BUCKET = "";
     public String MOSAIC_OUT_SMALL_BUCKET = "";
 
@@ -53,6 +56,7 @@ public class mosaicMeUploader  extends Thread{
     public String BIT_LY_LOGIN = "";
     public String BIT_LY_KEY_API = "";
     public String MOSAIC_WEB="";
+    public String PROTOCOL ="";
     public void run() {
         try {
 
@@ -77,6 +81,9 @@ public class mosaicMeUploader  extends Thread{
             S3_ENDPOINT = prop.getProperty("proxy");
             S3_BUCKET = prop.getProperty("emcbucket");
             LOCAL_DIR = prop.getProperty("emclocal");
+            SWIFT_ACCESS_KEY_ID = prop.getProperty("swiftusername");
+            SWIFT_SECRET_KEY = prop.getProperty("swiftpassword");
+            SWIFT_ENDPOINT = prop.getProperty("swiftproxy");
 
             FINISHED_QUEUE_NAME = prop.getProperty("twitterQueue");
             DONE_QUEUE_NAME = prop.getProperty("uploaderQueue");
@@ -93,6 +100,7 @@ public class mosaicMeUploader  extends Thread{
             CONSUMER_SECRET = prop.getProperty("consumerSecret");;
             ACCESS_TOKEN = prop.getProperty("accessToken");;
             ACCESS_TOKEN_SECRET = prop.getProperty("accessTokenSecret");;
+            PROTOCOL=prop.getProperty("objectType");
 
             BIT_LY_KEY_API=prop.getProperty("bitlyapikey");
             BIT_LY_LOGIN=prop.getProperty("bitlylogin");
@@ -149,48 +157,46 @@ public class mosaicMeUploader  extends Thread{
             String largeimage=image;
             String smallimage=image;
 
-
             FileInputStream fis2 = new FileInputStream(filesmall);
-            s3api.CreateObjectWithMeta(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, MOSAIC_OUT_SMALL_BUCKET, smallimage, fis2, "username", user);
-
-
-
-            java.util.Date expiration = new java.util.Date();
-            long milliSeconds = expiration.getTime();
-            milliSeconds += 1000 * 60 * 60*24*365; // Add 1 hour.
-            expiration.setTime(milliSeconds);
-
-            GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(MOSAIC_OUT_SMALL_BUCKET, smallimage);
-            generatePresignedUrlRequest.setMethod(HttpMethod.GET);
-            generatePresignedUrlRequest.setExpiration(expiration);
-
-            URL smallurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
-
-
-
-
             FileInputStream fis = new FileInputStream(filelarge);
             File f = new File(filelarge);
+            URL largeurl = new URL("www.google.com");
+            URL smallurl = new URL("www.google.com");
 
-            s3api.CreateLargeObject(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,MOSAIC_OUT_LARGE_BUCKET,largeimage, f,"username", user);
+            if(PROTOCOL.equals("S3")) {
+                s3api.CreateObjectWithMeta(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, MOSAIC_OUT_SMALL_BUCKET, smallimage, fis2, "username", user);
+                s3api.CreateLargeObject(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, MOSAIC_OUT_LARGE_BUCKET, largeimage, f, "username", user);
 
-            generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(MOSAIC_OUT_LARGE_BUCKET, largeimage);
-            generatePresignedUrlRequest.setMethod(HttpMethod.GET);
-            generatePresignedUrlRequest.setExpiration(expiration);
+                java.util.Date expiration = new java.util.Date();
+                long milliSeconds = expiration.getTime();
+                milliSeconds += 1000 * 60 * 60 * 24 * 365; // Add 1 hour.
+                expiration.setTime(milliSeconds);
 
-            URL largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID,S3_SECRET_KEY,S3_ENDPOINT,null,generatePresignedUrlRequest);
+                GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                        new GeneratePresignedUrlRequest(MOSAIC_OUT_SMALL_BUCKET, smallimage);
+                generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+                generatePresignedUrlRequest.setExpiration(expiration);
+
+                smallurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, generatePresignedUrlRequest);
+
+                generatePresignedUrlRequest =
+                        new GeneratePresignedUrlRequest(MOSAIC_OUT_LARGE_BUCKET, largeimage);
+                generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+                generatePresignedUrlRequest.setExpiration(expiration);
+
+                largeurl = s3api.generatePresignedUrl(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, generatePresignedUrlRequest);
+
+            }
+            else {
+
+                swiftapi.CreateObjectWithMeta(SWIFT_ACCESS_KEY_ID, SWIFT_SECRET_KEY, SWIFT_ENDPOINT, MOSAIC_OUT_SMALL_BUCKET, smallimage, fis2, "username", user);
+                swiftapi.CreateLargeObjectWithMeta(SWIFT_ACCESS_KEY_ID, SWIFT_SECRET_KEY, SWIFT_ENDPOINT, MOSAIC_OUT_LARGE_BUCKET, largeimage, fis, "username", user);
+
+
+            }
 
             largeurl=new URL(MOSAIC_WEB+image);
             putMessge(smallurl.toString(),largeurl.toString(),user);
-
-            //Delete Files
-        //    if(!(new File(filelarge).delete()))
-           //     System.out.println("Can not delete file "+filelarge);
-
-       //     if(!(new File(filesmall).delete()))
-            //    System.out.println("Can not delete file "+filesmall);
 
         } catch ( Exception e)
         {
