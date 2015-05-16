@@ -14,10 +14,6 @@ RUN apt-get install -y build-essential git curl
 # Copy the application folder inside the container
 ADD . /app/mosaicme-cacher
 
-# Add the config directory volume
-RUN mkdir /app/config
-VOLUME ["/app/config"]
-
 # Get pip to download and install requirements:
 RUN pip install -r /app/mosaicme-cacher/requirements.txt
 
