@@ -120,7 +120,12 @@ def main():
             mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
             mosaic['username'] = username
             mosaic['date'] = key.last_modified
-            r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
+            try:
+                r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
+            except:
+                logger.error("Could not save mosaics into Redis")
+                continue
+
             data['mosaics'].append(mosaic)
 
         data['size'] = len(data['mosaics'])

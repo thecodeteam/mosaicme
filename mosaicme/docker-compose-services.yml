@@ -7,6 +7,13 @@
 #     - LISTEN_HASHTAG=openstacksummit
 #     - S3_BUCKET=openstack
 
+
+celeryworkers:
+  image: emccode/mosaicme-collector
+  links:
+    - rabbit
+  command: celery -A tasks worker --loglevel=info
+
 mosaiccollector:
   image: emccode/mosaicme-collector
   links:
@@ -17,12 +24,9 @@ mosaiccollector:
     - MOSAIC_BUCKET=mosaic-in
     - MOSAIC_QUEUE=mosaic-in
 
-# celeryworker:
-#   image: emccode/mosaicme-celery
-#   links:
-#     - rabbit
-#
 rabbit:
   image: rabbitmq
   environment:
     - RABBITMQ_NODENAME=my-rabbit
+  ports:
+    - "0.0.0.0:5672:5672"
