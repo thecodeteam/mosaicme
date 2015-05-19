@@ -32,7 +32,7 @@ Display list Mosaics				  | Shows the list of mosaics currently stored in the sy
 Mosaic API open for Developers | Developers can use the Mosaic API endpoints to access the list of pictures and Mosaics.
 
 
-### Stretch Goals
+### Extended Goals
 
 
 Use Case	                          | Description
@@ -74,43 +74,34 @@ Orchestration API service   | API service that orchestrates interactions with al
 Configuration Service       | Service to maintain configuration, synchronization and naming registry.
 
 
-### Component 1 
-
-Introduction 
-
-**[Image of Component 1]**
-
-Description
+### MosaicMe Architecture Optimization
 
 
+![MosaicMe architecture optimization diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-Optimizations.png)
 
-### Component 2 
 
-Introduction 
+### MosaicMe Logging Architecture 
 
-**[Image of Component 2]**
 
-Description
-   
+![MosaicMe Logging Architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-logging.png)
 
-### Component 3 
 
-Introduction 
+### MosaicMe Data Replication Architecture 
 
-**[Image of Component 3]**
 
-Description
-   
+![MosaicMe Data Replication Architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-DataReplication.png)
 
 
 
-## References
+### MosaicMe Architecture Optimization
 
-[1] Reference 1
- 
-[2] Reference 2 
 
-[3] Reference 3
+![MosaicMe architecture optimization diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-Optimizations.png)
+
+
+
+
+
 
 ##Contributing to MosaicMe
 
