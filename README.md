@@ -76,6 +76,10 @@ Configuration Service       | Service to maintain configuration, synchronization
 
 ### MosaicMe Architecture Optimization
 
+MosaicMe implements two main web application optimizations:
+
+1. Use of Caching Service (REDIS) with a defined Time to Live (TTL) policy.
+2. Use of Load Balancer with a Round Robin.
 
 ![MosaicMe architecture optimization diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-Optimizations.png)
 
@@ -90,16 +94,6 @@ Configuration Service       | Service to maintain configuration, synchronization
 
 
 ![MosaicMe Data Replication Architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-DataReplication.png)
-
-
-
-### MosaicMe Architecture Optimization
-
-
-![MosaicMe architecture optimization diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-Optimizations.png)
-
-
-
 
 
 
