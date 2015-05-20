@@ -18,29 +18,19 @@ Mosaicme's goal is to provide developers with working example in how to build a 
 ## Use Cases
 
 
-The following section provides an overview of the Use Cases for Mosaicme. There are two main actors for this application  only one actor for this application, the end-user:
-
-### Minimum viable Product (MVP)
+The following section provides an overview of the Use Cases for MosaicMe. There are two main actors for this application  only one actor for this application, the end-user:
  
-Use Case	                          | Description
-------------------------------------- | -----------|
-Retrieve images from Twitter accounts | Mosaicme retrieves images from the selected list of Twitter accounts and stores them in the Object store. Use the EMC Code and EMCWorld twitter accounts. Use the #MosaicMe hashtag to trigger the picture retrieval.
-Process a mosaic from the submitted picture | System will build a mosaic from the submitted picture  using the stored pictures in the system. The resulting mosaic is then stored in the Object store and made available to the Web application via a URI.
-Post Mosaic to Twitter Account		  | Mosaicme will post a mosaic to a selected Twitter account(s) on a regular interval. This can be configured via the Configuration Section. The MosaicME Twitter Account  will Twitt to the EMCWorld and EMCCode Twitter Accounts.
-Display list Pictures				  | Shows the list of pictures currently stored in the system. The Data will available via the Web UI, API and ECS.
-Display list Mosaics				  | Shows the list of mosaics currently stored in the system. The data will be available via the Web UI, API and ECS.
-Mosaic API open for Developers | Developers can use the Mosaic API endpoints to access the list of pictures and Mosaics.
+Use Case	                          | Description | Completed
+------------------------------------- | -----------|-------------|
+Retrieve images from Twitter feeds (Hashtags) | MosaicMe retrieves images from the defined list of Twitter hashtags and stores them in the Object store. The pictures are used to build the image library that will be used for building each mosaic. the EMC Code and EMCWorld twitter accounts. | Yes
+Process a mosaic from a submitted picture | MosaicMe monitors a Twitter hashtag (#MosaicMe) for pictures. Once a picture is detected, it will build a mosaic from the submitted picture using the stored pictures in the object store.| Yes
+Tweet Mosaic to Twitter Account		  | MosaicMe will Tweet the mosaic to the person that tweeted to the selected Twitter hashtag (#MosaicMe) | Yes
+Display list Mosaics				  | Shows the list of mosaics currently stored in the system. The data will be available via the Web UI, API and ECS.| Yes
+View and Zoom into Mosaic | Select a mosaic, display mosaic in a full screen and provide ability to zoom into the mosaic to view in detail, the raw pictures used for the composition. | Yes 
+Configure Mosaicme 					  | Enables administrator to configure the system via a web interface. | No
+Mosaicme statistics                   | Generates a list of statistics based on usage, storage, and images. meta data. Will use a Haddop cluster to process the stadistics. | No	
+		
 
-
-### Extended Goals
-
-
-Use Case	                          | Description
-------------------------------------- | -----------|
-Booth Webcam						  | Webcam in the booth that allow people to take a picture and submit pictures to Twitter and then it follows the normal process for the mosaic creation and posting.
-SMS "My" Mosaic						  | Using Twilio Services, the System will SMS you the selected Mosaic. This can be done via the Web Interface or by the user send it an SMS with the picture ID.
-Configure Mosaicme 					  | Enables administrator to configure the system via a web interface.
-Mosaicme statistics                   | Generates a list of statistics based on usage, storage, and images. meta data. Will use a Haddop cluster to process stats.			
 
 
 ## Architecture 
@@ -53,47 +43,18 @@ The following diagram shows Mosaicme high level architecture:
 The following has an overview of each one of the components:
 
 
-### Minimum viable Product (MVP) Services
+Component Name              |	Component Description | Completed
+--------------------------- | ---------------------|---------------|
+Web Interface               | Web Interface to for displaying pictures, mosaics, statistics and system configuration. | Yes
+Mosaic processing service   | Mosaic processing service. Takes the mosaic generation request from the Orchestration API and generates the mosaic data and meta data. | Yes
+Queuing Service				| Service to host the queues required by the system. | Yes
+Twitter retrieval service   | Service that retrieves pictures and their meta data from the selected twitter accounts and adds them Object store. | Yes
+Statistics Service			| Haddop Cluster that takes the data in the Object Store and processes the statistics. Stores the data back to the Object store using HDFS. | No
+Caching Service             | Data caching service to speed the Web application. | Yes
+Log Routing Service		    | Service to route all services logs to the Object Store. | No
+Configuration & registry Service       | Service to maintain configuration, synchronization and naming registry. | No
 
-Component Name              |	Component Description
---------------------------- | ---------------------|
-Web Interface               | Web Interface to for displaying pictures, mosaics, statistics and system configuration. 
-Mosaic processing service   | Mosaic processing service. Takes the mosaic generation request from the Orchestration API and generates the mosaic data and meta data.
-Queuing Service				| Service to host the queues required by the system.
-Twitter retrieval service   | Service that retrieves pictures and their meta data from the selected twitter accounts and adds them Object store.
-
-
-### Stretch Goals Services
-
-Component Name              |	Component Description
---------------------------- | ---------------------|
-Statistics Service			| Haddop Cluster that takes the data in the Object Store and processes the statistics. Stores the data back to the Object store using HDFS.
-Caching Service             | Data caching service to speed the application.
-Log Routing Service		    | Service to route all services logs to the Object Store.
-Orchestration API service   | API service that orchestrates interactions with all services in the application. 
-Configuration Service       | Service to maintain configuration, synchronization and naming registry.
-
-
-### MosaicMe Architecture Optimization
-
-MosaicMe implements two main web application optimizations:
-
-1. Use of Caching Service (REDIS) with a defined Time to Live (TTL) policy.
-2. Use of Load Balancer with a Round Robin.
-
-![MosaicMe architecture optimization diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-Optimizations.png)
-
-
-### MosaicMe Logging Architecture 
-
-
-![MosaicMe Logging Architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-logging.png)
-
-
-### MosaicMe Data Replication Architecture 
-
-
-![MosaicMe Data Replication Architecture diagram](https://github.com/emccode/mosaicme/blob/master/documentation/images/Mosaicme-Architecture-DataReplication.png)
+For More information about the MosaicMe application Architecture [click Here](https://github.com/emccode/mosaicme/blob/master/documentation/MosaicMe-Architecture.md)
 
 
 
