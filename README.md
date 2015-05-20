@@ -15,6 +15,9 @@ Mosaicme's goal is to provide developers with working example in how to build a 
 - Use of Puppet/Chef to deploy the application 
 
 
+**For installation instructions  [click Here](https://github.com/emccode/mosaicme/blob/master/documentation/MosaicMe-installation.md)**
+
+
 ## Use Cases
 
 
@@ -54,7 +57,7 @@ Caching Service             | Data caching service to speed the Web application.
 Log Routing Service		    | Service to route all services logs to the Object Store. | No
 Configuration & registry Service       | Service to maintain configuration, synchronization and naming registry. | No
 
-For More information about the MosaicMe application Architecture [click Here](https://github.com/emccode/mosaicme/blob/master/documentation/MosaicMe-Architecture.md)
+**For More information about the MosaicMe application Architecture [click Here](https://github.com/emccode/mosaicme/blob/master/documentation/MosaicMe-Architecture.md)**
 
 
 
