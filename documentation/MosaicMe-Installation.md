@@ -16,12 +16,31 @@ MosaicMe is composed by multiple services running on Docker Container:
 |Queue|Distributed Queue|Queue Service to decouple dependencies and provide sociability (RabbitMQ)|Yes (x3)|Yes|Yes|
 |Registry|Registry Service |Source Of truth for the Application (Consul)|Yes (x3)|Yes|Yes|
 |Logging|Logging Router|Route logs from all components of the application (FuentD)|Yes (x3)|Yes|Yes|
+|Object Store|Object Storage| Application state and data is stored as objects (EMC's ECS)|Yes (x4)|Yes|Yes|
+
 
 
 ## MosaicMe Containers location
 
+|Group|Service|Container Location|
+|-----|-------|--------|
+|MosicMe|Twitter Collector|url|
+|MosicMe|Mosaic Engine|url|
+|MosicMe|Web Server|url|
+|Queue|Queue Service|url|
+|Registry|Registry Service|url|
+|Logging|Logging Router|url|
+|Object Store|Object Storage|url|
 
-## Using Puppet for Deployment
+
+
+## Using Puppet / Ansible for Deployment
+
+
+
+## MosaicMe Continuous Integration (CI) and Continuous Deployment (CD) Overview
+
+
 
 
 
