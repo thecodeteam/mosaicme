@@ -2,7 +2,7 @@
 
 Mosaicme is a [Microservice](http://en.wikipedia.org/wiki/Microservices "Microservices") application that retrieves images from selected Twitter feeds, stores them on an [object store](http://en.wikipedia.org/wiki/Object_storage "Object Store"), and then it process them to build a mosaic based on a selected set of pictures. 
 
-Mosaicme's goal is to provide developers with working example in how to build a distributed microservice application using best practices. The application includes the following 
+The MosaicMe application is a demo application to showcase how to design, build, and deploy a MicroService application. We have followed the best practices shared by the [12 Factor App](http://12factor.net/) manifest and best of breed DevOps practices to showcase how to do continuous integration (CI) and Continuous Deployment (CD) to automate the deployment of the application. The application includes the following: 
 
 - Use of Linux containers to host each service.
 - Use of Object stores.
