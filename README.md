@@ -15,7 +15,7 @@ Mosaicme's goal is to provide developers with working example in how to build a 
 - Use of Puppet/Chef to deploy the application 
 
 
-**For installation instructions  [click Here](https://github.com/emccode/mosaicme/blob/master/documentation/MosaicMe-installation.md)**
+**For installation instructions  [click Here](https://github.com/emccode/mosaicme/blob/master/documentation/MosaicMe-Installation.md)**
 
 
 ## Use Cases
