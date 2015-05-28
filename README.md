@@ -85,9 +85,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 This code is provided under the Developer Certificate of Origin- [Insert Name], [Date (e.g., 1/1/15]”
 
 
-**For example: **
+**For example:**
 
-A contribution from **Joe Developer**, an **independent developer**, submitted in** May 15th of 2015** should have an associated license (as file or/and code comments) like this:
+A contribution from **Joe Developer**, an **independent developer**, submitted in **May 15th of 2015** should have an associated license (as file or/and code comments) like this:
  
 “The MIT License (MIT)
 
