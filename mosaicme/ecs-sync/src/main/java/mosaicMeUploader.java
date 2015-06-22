@@ -57,6 +57,7 @@ public class mosaicMeUploader  extends Thread{
     public String BIT_LY_KEY_API = "";
     public String MOSAIC_WEB="";
     public String PROTOCOL ="";
+    public String TWEET_LARGE="";
     public void run() {
         try {
 
@@ -106,7 +107,7 @@ public class mosaicMeUploader  extends Thread{
             BIT_LY_LOGIN=prop.getProperty("bitlylogin");
 
             MOSAIC_WEB=prop.getProperty("mosaicweb");
-
+            TWEET_LARGE=prop.getProperty("tweetlargeimage");
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(QUEUE_HOST_NAME);
             Connection connection = factory.newConnection();
@@ -195,7 +196,11 @@ public class mosaicMeUploader  extends Thread{
 
             }
 
+            if( TWEET_LARGE.equals("1"))
             largeurl=new URL(MOSAIC_WEB+image);
+            else
+                largeurl=new URL(MOSAIC_WEB);
+
             putMessge(smallurl.toString(),largeurl.toString(),user);
 
         } catch ( Exception e)
