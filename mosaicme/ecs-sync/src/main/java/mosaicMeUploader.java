@@ -116,6 +116,13 @@ public class mosaicMeUploader  extends Thread{
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
 
+
+            System.out.println("===================================================");
+            System.out.println("======= Before start Validation ===================");
+            System.out.println("Listen to Queue " + DONE_QUEUE_NAME);
+            System.out.println("Current Protocal" + PROTOCOL);
+
+
             channel.queueDeclare(DONE_QUEUE_NAME, true, false, false, null);
             System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
             vLogger.LogInfo("mosaicMeUploader:  [*] Waiting for messages. To exit press CTRL+C");
@@ -150,7 +157,7 @@ public class mosaicMeUploader  extends Thread{
             vLogger.LogInfo("mosaicMeUploader:  Upload Image '" + msg + "'");
 
             System.out.println(" Upload Image '" + msg + "'");
-            vLogger.LogInfo("mosaicMeDownloader: Upload Image '" + msg + "'");
+            vLogger.LogInfo("mosaicMeUpload: Upload Image '" + msg + "'");
             System.out.println(PROTOCOL);
 
             JSONParser jsonParser = new JSONParser();
