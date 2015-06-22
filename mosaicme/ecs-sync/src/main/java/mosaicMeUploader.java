@@ -108,6 +108,9 @@ public class mosaicMeUploader  extends Thread{
 
             MOSAIC_WEB=prop.getProperty("mosaicweb");
             TWEET_LARGE=prop.getProperty("tweetlargeimage");
+
+
+
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(QUEUE_HOST_NAME);
             Connection connection = factory.newConnection();
@@ -144,10 +147,12 @@ public class mosaicMeUploader  extends Thread{
 
     public void uploadImage(String msg) {
         try {
-            vLogger.LogInfo("mosaicMeUploader:  Download Image '" + msg + "'");
+            vLogger.LogInfo("mosaicMeUploader:  Upload Image '" + msg + "'");
 
-            System.out.println(" Download Image '" + msg + "'");
-            vLogger.LogInfo("mosaicMeDownloader: Download Image '" + msg + "'");
+            System.out.println(" Upload Image '" + msg + "'");
+            vLogger.LogInfo("mosaicMeDownloader: Upload Image '" + msg + "'");
+            System.out.println(PROTOCOL);
+
             JSONParser jsonParser = new JSONParser();
             org.json.simple.JSONObject jsonObject = (org.json.simple.JSONObject) jsonParser.parse(msg);
             String image = (String) jsonObject.get("media_id") +".jpg";
@@ -195,6 +200,8 @@ public class mosaicMeUploader  extends Thread{
 
 
             }
+            System.out.println(TWEET_LARGE);
+            System.out.println(MOSAIC_WEB);
 
             if( TWEET_LARGE.equals("1"))
             largeurl=new URL(MOSAIC_WEB+image);
