@@ -173,8 +173,8 @@ public class mosaicMeUploader  extends Thread{
             FileInputStream fis2 = new FileInputStream(filesmall);
             FileInputStream fis = new FileInputStream(filelarge);
             File f = new File(filelarge);
-            URL largeurl = new URL("www.google.com");
-            URL smallurl = new URL("www.google.com");
+            URL largeurl = new URL("http://www.google.com");
+            URL smallurl = new URL("http://www.google.com");
 
             if(PROTOCOL.equals("S3")) {
                 s3api.CreateObjectWithMeta(S3_ACCESS_KEY_ID, S3_SECRET_KEY, S3_ENDPOINT, null, MOSAIC_OUT_SMALL_BUCKET, smallimage, fis2, "username", user);
