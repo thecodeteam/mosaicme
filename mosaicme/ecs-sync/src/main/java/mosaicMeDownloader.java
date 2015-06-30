@@ -42,17 +42,16 @@ public class mosaicMeDownloader  extends Thread{
 
             vLogger.LogInfo("mosaicMeDownloader: Start up");
             Properties prop = new Properties();
-            ClassLoader classLoader = getClass().getClassLoader();
-            prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
-            System.out.println(prop.getProperty("username"));
-            System.out.println(prop.getProperty("password"));
-            System.out.println(prop.getProperty("proxy"));
-            System.out.println(prop.getProperty("emcbucket"));
-            System.out.println(prop.getProperty("emclocal"));
-            System.out.println(prop.getProperty("downloaderQueue"));
-            System.out.println(prop.getProperty("engineQueue"));
-            System.out.println(prop.getProperty("queueHost"));
-            System.out.println(prop.getProperty("mosaicin"));
+            File fecsconfig = new File("/mosaic/setting/ecsconfig.properties");
+            if(fecsconfig.exists()) {
+                vLogger.LogInfo("mosaicMeDownloader: Read Conf file from mosaic folder");
+                prop.load(new FileInputStream(fecsconfig));
+            }
+            else {
+                vLogger.LogInfo("mosaicMeDownloader: Read Conf file from local folder");
+                ClassLoader classLoader = getClass().getClassLoader();
+                prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
+            }
 
             S3_ACCESS_KEY_ID = prop.getProperty("username");
             S3_SECRET_KEY = prop.getProperty("password");

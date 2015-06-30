@@ -63,20 +63,17 @@ public class mosaicMeUploader  extends Thread{
 
             vLogger.LogInfo("mosaicMeUploader: Start up");
             Properties prop = new Properties();
-            ClassLoader classLoader = getClass().getClassLoader();
-            prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
-            System.out.println(prop.getProperty("username"));
-            System.out.println(prop.getProperty("password"));
-            System.out.println(prop.getProperty("proxy"));
-            System.out.println(prop.getProperty("emcbucket"));
-            System.out.println(prop.getProperty("emclocal"));
-            System.out.println(prop.getProperty("uploaderQueue"));
-            System.out.println(prop.getProperty("queueHost"));
-            System.out.println(prop.getProperty("twitterQueue"));
-            System.out.println(prop.getProperty("mosaicoutlarge"));
-            System.out.println(prop.getProperty("outlargebucket"));
-            System.out.println(prop.getProperty("outsmallbucket"));
 
+            File fecsconfig = new File("/mosaic/setting/ecsconfig.properties");
+            if(fecsconfig.exists()) {
+                vLogger.LogInfo("mosaicMeUpload: Read Conf file from mosaic folder");
+                prop.load(new FileInputStream(fecsconfig));
+            }
+            else {
+                vLogger.LogInfo("mosaicMeUpload: Read Conf file from local folder");
+                ClassLoader classLoader = getClass().getClassLoader();
+                prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
+            }
             S3_ACCESS_KEY_ID = prop.getProperty("username");
             S3_SECRET_KEY = prop.getProperty("password");
             S3_ENDPOINT = prop.getProperty("proxy");

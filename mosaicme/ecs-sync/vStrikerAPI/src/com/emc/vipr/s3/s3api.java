@@ -59,12 +59,11 @@ public class s3api {
 			String S3_SECRET_KEY, String S3_ENDPOINT, String S3_ViPR_NAMESPACE,
 			String S3_BUCKET) throws Exception {
 		// create the ViPR S3 Client
-		ViPRS3Client s3 = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
-				S3_ENDPOINT, S3_ViPR_NAMESPACE);
+			ViPRS3Client s3 = getS3Client(S3_ACCESS_KEY_ID, S3_SECRET_KEY,
+					S3_ENDPOINT, S3_ViPR_NAMESPACE);
 
-		// create the bucket - used for subsequent demo operations
-		s3.createBucket(S3_BUCKET);
-
+			// create the bucket - used for subsequent demo operations
+			s3.createBucket(S3_BUCKET);
 	}
 
 	public static ObjectListing ReadBucket(String S3_ACCESS_KEY_ID,

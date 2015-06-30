@@ -42,13 +42,16 @@ public class emcWorldDownloader  extends Thread{
         try {
             vLogger.LogInfo("emcWorldDownloader: Start up");
             Properties prop = new Properties();
-            ClassLoader classLoader = getClass().getClassLoader();
-            prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
-            System.out.println(prop.getProperty("username"));
-            System.out.println(prop.getProperty("password"));
-            System.out.println(prop.getProperty("proxy"));
-            System.out.println(prop.getProperty("emcbucket"));
-            System.out.println(prop.getProperty("emclocal"));
+            File fecsconfig = new File("/mosaic/setting/ecsconfig.properties");
+            if(fecsconfig.exists()) {
+                vLogger.LogInfo("emcWorldDownloader: Read Conf file from mosaic folder");
+                prop.load(new FileInputStream(fecsconfig));
+            }
+            else {
+                vLogger.LogInfo("emcWorldDownloader: Read Conf file from local folder");
+                ClassLoader classLoader = getClass().getClassLoader();
+                prop.load(new FileInputStream(classLoader.getResource("ecsconfig.properties").getFile()));
+            }
 
             S3_ACCESS_KEY_ID = prop.getProperty("username");
             S3_SECRET_KEY = prop.getProperty("password");
@@ -57,15 +60,12 @@ public class emcWorldDownloader  extends Thread{
             SWIFT_ACCESS_KEY_ID = prop.getProperty("swiftusername");
             SWIFT_SECRET_KEY = prop.getProperty("swiftpassword");
             SWIFT_ENDPOINT = prop.getProperty("swiftproxy");
-            SWIFT_BUCKET = prop.getProperty("swiftbucket");
+            SWIFT_BUCKET = prop.getProperty("swiftcollectbucket");
 
-            S3_BUCKET = prop.getProperty("s3bucket");
+            S3_BUCKET = prop.getProperty("s3collectbucket");
             LOCAL_DIR = prop.getProperty("emclocal");
 
-
-
             PROTOCOL=prop.getProperty("objectType");
-
             if(PROTOCOL.equals("S3")) DownloadUsingS3();
             else
                 DownloadUsingSWIFT();
