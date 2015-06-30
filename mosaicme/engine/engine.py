@@ -92,6 +92,28 @@ def putMsg(msg):
     logging.info('[engine]  [x] Finished Putting Msg')
 
 
+def callback(ch, method, properties, body):
+    logging.info('[engine]  [x] Received %r' % (body,))
+    print " [x] Received %r" % (body,)
+    data=json.loads(body)
+    image=data["media_id"]+".jpg"
+    # copy file to local temp
+    if(copySourceFile(image)):
+    #covert share to small
+        buildTiles()
+        #call to create mosaic file
+        createMosaic(image)
+        #create thumnails
+        createThumbnails(image)
+        #move files
+        moveFiles(image)
+        #put msg
+        putMsg(body)
+    print " [x] Done"
+    logging.info('[engine] Done')
+    time.sleep(5)
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 logging.config.fileConfig(os.path.join(BASE_DIR, 'logging.conf'))
 logger = logging.getLogger(__name__)
@@ -99,7 +121,11 @@ logger = logging.getLogger(__name__)
 print "Read setting ini"
 logger.info('[engine] Read Setting ini')
 config = configparser.ConfigParser()
-config.read('engine.ini')
+if(os.path.isfile('/mosaic/setting/engine.ini') ):
+    config.read('/mosaic/setting/engine.ini')
+else:
+    config.read('engine.ini')
+
 hostname =config['DEFAULT']['hostname']
 thm_size =config['DEFAULT']['thm_size']
 queueeng=config['DEFAULT']['queueeng']
@@ -115,28 +141,6 @@ channel = connection.channel()
 channel.queue_declare(queue='mosaic-eng', durable=True)
 print ' [*] Waiting for messages. To exit press CTRL+C'
 logging.info('[engine]  [*] Waiting for messages. To exit press CTRL+C')
-def callback(ch, method, properties, body):
-        logging.info('[engine]  [x] Received %r' % (body,))
-        print " [x] Received %r" % (body,)
-        data=json.loads(body)
-        image=data["media_id"]+".jpg";
-        # copy file to local temp
-        if(copySourceFile(image)):
-            #covert share to small
-            buildTiles()
-            #call to create mosaic file
-            createMosaic(image)
-            #create thumnails
-            createThumbnails(image)
-            #move files
-            moveFiles(image)
-            #put msg
-            putMsg(body)
-        print " [x] Done"
-        logging.info('[engine] Done')
-        time.sleep(5)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
-
 channel.basic_qos(prefetch_count=1)
 channel.basic_consume(callback,
                       queue='mosaic-eng')
