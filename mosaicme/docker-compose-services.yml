@@ -13,8 +13,9 @@ celeryworkers:
   links:
     - rabbit
   command: celery -A tasks worker --loglevel=info
+  restart: always
 
-mosaiccollector:
+collector:
   image: emccode/mosaicme-collector
   links:
     - rabbit
@@ -23,9 +24,11 @@ mosaiccollector:
     - MOSAIC_LISTEN_HASHTAG=mosaicme
     - MOSAIC_BUCKET=mosaic-in
     - MOSAIC_QUEUE=mosaic-in
+  restart: always
 
 rabbit:
   image: rabbitmq
+  hostname: my-rabbit
   environment:
     - RABBITMQ_NODENAME=my-rabbit
   ports:
