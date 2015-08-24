@@ -1,3 +1,7 @@
+# MosaicMe
+[![Join the chat at https://gitter.im/emccode](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/emccode?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Stories in Ready](https://badge.waffle.io/emccode/mosaicme.svg?label=ready&title=Ready)](http://waffle.io/emccode/mosaicme)
+
 ## Introduction
 
 Mosaicme is a [Microservice](http://en.wikipedia.org/wiki/Microservices "Microservices") application that retrieves images from selected Twitter feeds, stores them on an [object store](http://en.wikipedia.org/wiki/Object_storage "Object Store"), and then it process them to build a mosaic based on a selected set of pictures. 
