@@ -1,32 +1,24 @@
-Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
+Exec { path => [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ] }
 
-exec { 'apt-get update':
-  command => 'apt-get update',
-  timeout => 60,
-  tries   => 3
-}
-
-class { 'apt':
-  always_apt_update => true,
-}
+include apt
 
 package { ['python-software-properties']:
   ensure  => 'installed',
-  require => Exec['apt-get update'],
+  require => Class['apt'],
 }
 
 $sysPackages = ['git', 'curl', 'metapixel', 'supervisor']
 package { $sysPackages:
-  ensure => "installed",
-  require => Exec['apt-get update'],
+  ensure  => 'installed',
+  require => Class['apt'],
 }
 
 class { 'python' :
-    version    => 'system',
-    pip        => true,
-    dev        => true,
-    gunicorn   => true,
-  }
+  version  => 'system',
+  pip      => 'present',
+  dev      => 'present',
+  gunicorn => 'present',
+}
 
 python::requirements { '/tmp/requirements.txt': }
 
@@ -35,7 +27,7 @@ class { 'java':
 }
 
 class { '::rabbitmq':
-  port              => '5672',
+  port => '5672',
 }
 
 include redis
