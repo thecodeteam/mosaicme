@@ -118,10 +118,10 @@ mosaicmeApp
             $scope.currentMosaics = $scope.newMosaics;
             $scope.currentMosaics = orderBy($scope.currentMosaics, '-date', false);
             $scope.latestMosaics = $scope.currentMosaics.slice(0, 5);
-            
+
         };
 
-        $scope.loadPromise = $http.get('/mosaic').
+        $scope.loadPromise = $http.get('/mosaic/').
             success(function (data, status, headers, config) {
 
                 $log.debug('Loading mosaics');
@@ -149,7 +149,7 @@ mosaicmeApp
     .controller('MosaicDetailsCtrl', ['$scope', '$http', '$routeParams',
         function ($scope, $http, $routeParams) {
 
-            $scope.loadPromise = $http.get('/mosaic/' + $routeParams.mosaicId).
+            $scope.loadPromise = $http.get('/mosaic/' + $routeParams.mosaicId + '/').
                 success(function (data, status, headers, config) {
                     $scope.urlSmall = data['url_small'];
                     $scope.urlLarge = data['url_large'];

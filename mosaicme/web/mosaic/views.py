@@ -27,8 +27,10 @@ def mosaic_list(request):
                            calling_format='boto.s3.connection.ProtocolIndependentOrdinaryCallingFormat',
                            is_secure=settings.S3_HTTPS)
     try:
-        bucket_small = s3_conn.get_bucket('mosaic-outsmall')
-        bucket_large = s3_conn.get_bucket('mosaic-outlarge')
+        bucket_small = s3_conn.get_bucket('mosaic-outsmall', validate=False)
+        bucket_large = s3_conn.get_bucket('mosaic-outlarge', validate=False)
+        bucket_small.list()
+        bucket_large.list()
     except boto.exception.S3ResponseError, e:
         return JsonResponse({'error': 'Could not connect to object store'}, status=500)
 
