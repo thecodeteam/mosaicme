@@ -67,7 +67,8 @@ def main():
 
     logger.info('Checking connection with object store...')
     try:
-        s3_conn.get_bucket("mosaic-outlarge")
+        bucket = s3_conn.get_bucket("mosaic-outlarge", validate=False)
+        bucket.list()
     except boto.exception.S3ResponseError:
         logger.error("Could not obtain bucket: mosaic-outlarge")
         sys.exit(5)
@@ -88,8 +89,8 @@ def main():
         logger.info('Getting keys from object store...')
 
         try:
-            bucket_small = s3_conn.get_bucket('mosaic-outsmall')
-            bucket_large = s3_conn.get_bucket('mosaic-outlarge')
+            bucket_small = s3_conn.get_bucket('mosaic-outsmall', validate=False)
+            bucket_large = s3_conn.get_bucket('mosaic-outlarge', validate=False)
         except boto.exception.S3ResponseError, e:
             logger.error("Could not get bucket.")
             continue
