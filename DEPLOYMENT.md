@@ -30,17 +30,7 @@ MosaicMe stores uses an S3-compatible object storage to store source images and 
 - `mosaic-outlarge` for the resulting mosaics (high resolution)
 - `mosaic-outsmall` for the resulting mosaics (low resolution, thumbnails)
 
-For testing pursoses you can also use the `fake-s3` tool to simulate a S3-compatible store in your local environment.
-
-Launch the container:
-
-```
-docker run -d --name s3 -p 4569:4569 lphoward/fake-s3
-```
-
-And use the following guide to configure `s3cmd` with `fake-s3` and create the needed buckets.
-
-https://community.emc.com/docs/DOC-27923
+You can use EMC ECS Community Edition to easily create an object storage service: https://github.com/EMCECS/ECS-CommunityEdition
 
 ## RabbitMQ
 
@@ -66,7 +56,8 @@ First of all let's create some directories in the host machine that will be shar
 
 ```bash
 cd ~
-mkdir -p mosaic/{setting,raw,in,out,large,small,logs}
+mkdir -p mosaic/{setting,raw,in,out,logs}
+mkdir -p mosaic/out/{large,small}
 ```
 
 Now create a file named `engine.ini` in `mosaic/setting`
