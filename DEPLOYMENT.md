@@ -1,3 +1,5 @@
+# Deployment guide
+
 The easiest way to deploy MosaicMe is leveraging the Docker images we have created for each one of the components. In this guide we are going to go through the steps needed to deploy MosaicMe. We assume that you have a Docker environment ready.
 
 We are going to use the following Docker images:
