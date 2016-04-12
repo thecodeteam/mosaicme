@@ -147,7 +147,8 @@ def main():
 
     logger.info('Checking connection with object store (%s:%s)...' % (s3_host, s3_port))
     try:
-        s3_conn.get_bucket(bucket)
+        bucket = s3_conn.get_bucket(bucket, validate=False)
+        bucket.list()
     except Exception, e:
         logger.error("Could not obtain bucket: %s. %s" % (bucket, str(e)))
         sys.exit(6)
