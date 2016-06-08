@@ -30,7 +30,7 @@ MosaicMe stores uses an S3-compatible object storage to store source images and 
 - `mosaic-outlarge` for the resulting mosaics (high resolution)
 - `mosaic-outsmall` for the resulting mosaics (low resolution, thumbnails)
 
-You can use EMC ECS Community Edition to easily create an object storage service: https://github.com/EMCECS/ECS-CommunityEdition
+You can also use EMC ECS Community Edition to easily create an object storage service: https://github.com/EMCECS/ECS-CommunityEdition
 
 ## RabbitMQ
 
@@ -94,12 +94,13 @@ Create a file named `ecsconfig.properties` in `mosaic/setting`.
 touch ~/mosaic/setting/ecsconfig.properties
 ```
 
-and fill it with the following content and replace the Twitter credentials with your own ones.
+and fill it with the following content and replace the Twitter credentials with your own ones and the `proxy`, `username`, and `password` key with your S3 credentials.
 
 ```
-username=root
-password=root
-proxy=http://s3:4569
+objectType=S3
+username=S3_ACCESS_KEY
+password=S3_SECRET_ACCESS_KEY
+proxy=http://S3_HOST:S3_PORT
 
 s3collectbucket=mosaic-raw
 
@@ -126,26 +127,24 @@ mosaicweb=http://mosaicme.emccode.com/#/mosaic/
 tweetlargeimage=0
 bitlylogin=emccodemosaicme
 bitlyapikey=R_ba21f62be4aa45c6bbb697ab6c137dd8
-
-objectType=S3
 ```
 
 Run the download sync.
 
 ```
-docker run -d --name mosaicme-sync-downloader -v ~/mosaic/logs:/var/log/mosaic -v ~/mosaic:/mosaic --link s3:s3 --link rabbit:rabbit emccode/mosaicme-sync /bin/startsyncdownload.sh
+docker run -d --name mosaicme-sync-downloader -v ~/mosaic/logs:/var/log/mosaic -v ~/mosaic:/mosaic --link rabbit:rabbit emccode/mosaicme-sync /bin/startsyncdownload.sh
 ```
 
 Run the upload sync.
 
 ```
-docker run -d --name mosaicme-sync-uploader -v ~/mosaic/logs:/var/log/mosaic -v ~/mosaic:/mosaic --link s3:s3 --link rabbit:rabbit emccode/mosaicme-sync /bin/startsyncupload.sh
+docker run -d --name mosaicme-sync-uploader -v ~/mosaic/logs:/var/log/mosaic -v ~/mosaic:/mosaic --link rabbit:rabbit emccode/mosaicme-sync /bin/startsyncupload.sh
 ```
 
 Run the raw images sync.
 
 ```
-docker run -d --name mosaicme-sync-raw -v ~/mosaic/logs:/var/log/mosaic -v ~/mosaic:/mosaic --link s3:s3 --link rabbit:rabbit emccode/mosaicme-sync /bin/startsyncemc.sh
+docker run -d --name mosaicme-sync-raw -v ~/mosaic/logs:/var/log/mosaic -v ~/mosaic:/mosaic --link rabbit:rabbit emccode/mosaicme-sync /bin/startsyncemc.sh
 ```
 
 ## Cacher
@@ -194,7 +193,7 @@ QUEUE_DONE=mosaic-done
 Launch the container.
 
 ```
-docker run -d --name mosaicme-cacher --env-file .env --link redis:redis --link s3:s3 emccode/mosaicme-cacher
+docker run -d --name mosaicme-cacher --env-file .env --link redis:redis emccode/mosaicme-cacher
 ```
 
 ## Web UI
