@@ -231,7 +231,7 @@ docker run -d --name mosaicme-collector-raw --link rabbit:rabbit --env-file .env
 Mosaic request collector with hashtag #mosaicme:
 
 ```
-docker run -d --name mosaicme-collector-in --link rabbit:rabbit --env-file .env -e "MOSAIC_QUEUE=mosaic-in" -e "MOSAIC_BUCKET=mosaic-raw" -e "MOSAIC_LISTEN_HASHTAG=mosaicme" emccode/mosaicme-collector
+docker run -d --name mosaicme-collector-in --link rabbit:rabbit --env-file .env -e "MOSAIC_QUEUE=mosaic-in" -e "MOSAIC_BUCKET=mosaic-in" -e "MOSAIC_LISTEN_HASHTAG=mosaicme" emccode/mosaicme-collector
 ```
 
 Give it some time to fill in the raw images bucket and then send a tweet containing an image and the hashtag #mosaicme and wait for your mosaic to generate and published to Twitter with the specified username.
