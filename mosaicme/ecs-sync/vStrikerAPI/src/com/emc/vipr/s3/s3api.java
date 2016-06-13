@@ -176,7 +176,7 @@ public class s3api {
 		}
 			InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(S3_BUCKET, key).withObjectMetadata(objmeta);
 			InitiateMultipartUploadResult initResponse =s3.initiateMultipartUpload(initRequest);
-			long partSize = 1 * 1024 * 1024; // Set part size to 1 MB.
+			long partSize = 5 * 1024 * 1024; // Set part size to 5 MB.
 			// list of UploadPartResponse objects for each part that is uploaded
 			List<PartETag> partETags = new ArrayList<PartETag>();
 			long filePosition = 0;
