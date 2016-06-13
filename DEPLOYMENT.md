@@ -104,10 +104,10 @@ proxy=http://S3_HOST:S3_PORT
 
 s3collectbucket=mosaic-raw
 
-emclocal=/mosaic
-mosaicin=/mosaic/in
-mosaicoutlarge=/mosaic/large
-mosaicoutsmall=/mosaic/small
+emclocal=/mosaic/raw/
+mosaicin=/mosaic/in/
+mosaicoutlarge=/mosaic/large/
+mosaicoutsmall=/mosaic/small/
 inbucket=mosaic-in
 outlargebucket=mosaic-outlarge
 outsmallbucket=mosaic-outsmall
