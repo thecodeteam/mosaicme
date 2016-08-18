@@ -106,8 +106,8 @@ s3collectbucket=mosaic-raw
 
 emclocal=/mosaic/raw/
 mosaicin=/mosaic/in/
-mosaicoutlarge=/mosaic/large/
-mosaicoutsmall=/mosaic/small/
+mosaicoutlarge=/mosaic/out/large/
+mosaicoutsmall=/mosaic/out/small/
 inbucket=mosaic-in
 outlargebucket=mosaic-outlarge
 outsmallbucket=mosaic-outsmall
