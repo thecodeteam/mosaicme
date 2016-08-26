@@ -15,7 +15,7 @@ MosaicMe is composed of multiple tiers. The following figure is a high level dia
 ![MosaicMe architecture](images/mosaicme-architecture.png)
 
 
-The whole process is triggered by a user sending a tweet with the hashtag #mosaicme and a picture like the following one.
+The whole process is triggered by a user sending a tweet with the hashtag `#mosaicme` and a picture like the following one.
 
 ![Tweet Mosaic request](images/tweet-mosaic-request.png)
 
@@ -23,7 +23,7 @@ Right after, the **Listener** service, which is connected to the **Twitter Strea
 
 An **Engine** worker takes over and downloads the image and builds the mosaic using [Metapixel](https://www.complang.tuwien.ac.at/schani/metapixel/). After a few minutes, once the mosaic is done, the Engine uploads the image to the object store (Swift, S3), attaching the requester information as object metadata. Afterwards, it notifies the **Publisher** and **Cacher** services.
 
-The **Publisher** service sends a tweet mentioning the user that requested the mosaic with the mosaic thumbnail attached and a link to the MosaicMe website to see the full-resolution mosaic.
+The **Publisher** service sends a tweet via the **Twitter REST API** mentioning the user that requested the mosaic with the mosaic thumbnail attached and a link to the MosaicMe website to see the full-resolution mosaic.
 
 ![Tweet Mosaic result](images/tweet-mosaic-result.png)
 
