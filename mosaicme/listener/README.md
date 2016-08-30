@@ -6,7 +6,7 @@ Once the application receives a tweet, it looks for an attached picture and obta
 
 The application is going to discard tweets that belong to the same user that is configured to publish tweets and those tweets that do not contain an image.
 
-![Flow chart](mosaicme-listener-flowchart.png)
+![Flow chart](../../images/mosaicme-listener-flowchart.png)
 
 
 ## Usage
