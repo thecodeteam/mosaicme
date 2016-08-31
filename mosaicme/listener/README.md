@@ -44,3 +44,43 @@ Also, you can optionally provide the hashtag it listens to, and the queue to sen
 
 * `MOSAIC_LISTEN_HASHTAG`
 * `MOSAIC_QUEUE`
+
+
+## Docker
+
+You can build the production image with the provided `Dockerfile`.
+
+```
+docker build -t emccode/mosaicme-listener .
+```
+
+And run it.
+
+```
+docker run -d --env-file your.env emccode/mosaicme-listener -t mosaicme -q engine
+```
+
+
+## Development
+
+For development purposes, you can launch a Docker container with RabbitMQ.
+
+```
+docker run -d --name rabbit rabbitmq
+```
+
+Build a Docker image for testing.
+
+```
+docker build -t listener .
+```
+
+And use the following command to run the component and your changes.
+
+```
+docker run -ti --rm --env-file your.env -v $(pwd):/usr/src/app --link rabbit:rabbit -e RABBITMQ_HOST=rabbit listener -t mosaicme -q engine
+```
+
+You don't need to rebuild the Docker image at every code change as the volume is mapped to the container.
+
+You only need to rebuild the image when you add a new dependency.

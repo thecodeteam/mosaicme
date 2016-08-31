@@ -1,5 +1,11 @@
-FROM python:3.6-onbuild
+FROM python:3.6-alpine
 
 MAINTAINER Adrian Moreno <adrian.moreno@emc.com>
 
-CMD [ "python", "./listener.py" ]
+COPY . /usr/src/app
+
+WORKDIR /usr/src/app
+
+RUN pip install -r requirements.txt
+
+ENTRYPOINT [ "python", "./listener.py" ]

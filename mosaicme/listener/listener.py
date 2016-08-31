@@ -4,19 +4,19 @@ import json
 import argparse
 import logging
 import logging.config
+import signal
 import tweepy
 import pika
 from retrying import retry
+from logging.config import fileConfig
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+fileConfig('logging.ini')
+logger = logging.getLogger()
 
 
 class TwitterListener(tweepy.StreamListener):
 
-    def __init__(self, rmq_credentials, queue, twitter_handler):
+    def __init__(self, twitter_handler, rmq_credentials, queue):
         self.rmq_credentials = rmq_credentials
         self.queue = queue
         self.twitter_handler = twitter_handler
@@ -25,35 +25,35 @@ class TwitterListener(tweepy.StreamListener):
         try:
             data = json.loads(str_data)
         except ValueError as e:
-            logger.warning('Could not parse JSON data. %s', str(e))
+            logger.warning('Could not parse JSON data. %s' % (str(e),))
             return True
 
+        twitter_handler = data['user']['screen_name']
+        user_name = data['user']['name']
         img_url = self.__get_img_url(data)
 
         if not img_url:
             logger.debug('No picture found')
             return True
 
-        if twitter_user.lower() == self.twitter_handler.lower():
-            logger.info('Ignoring tweet by user "%s"' % (self.twitter_handler, ))
+        if twitter_handler.lower() == self.twitter_handler.lower():
+            logger.debug('Ignoring tweet by user "%s"' % (self.twitter_handler, ))
             return True
 
-        logger.info('Picture found. URL: %s', img_url)
+        logger.info('[Tweet] User: %s (@%s). Pic URL: %s' % (user_name, twitter_handler, img_url))
 
-        message = {'twitter_handler': data['user']['screen_name'], 'img_url': img_url}
+        message = {'twitter_handler': twitter_handler, 'user_name': user_name, 'img_url': img_url}
         self.__send_message_to_queue(message)
-        logger.info('Notification sent to queue: %s', queue)
+        logger.debug('Notification sent to queue: %s' % (self.queue,))
         return True
 
     def on_error(self, status):
-        logger.error('Error from the Twitter feed: %s', status)
+        logger.error('Error from the Twitter feed: %s' % (status,))
 
-    def __get_img_url(data):
+    def __get_img_url(self, data):
         if 'extended_entities' not in data:
             return None
         if 'media' not in data['extended_entities']:
-            return None
-        if not data['extended_entities']['media']:
             return None
         media = data['extended_entities']['media']
         if media[0]['type'] != 'photo':
@@ -91,7 +91,7 @@ def main():
         print('Hashtag not provided.')
         sys.exit(1)
     hashtags = hashtags.split(",")
-    hashtags = map(lambda x: '#'+x, hashtags)
+    hashtags = list(map(lambda x: '#'+x, hashtags))
 
     queue = os.getenv('MOSAIC_QUEUE', args.queue)
     if not queue:
@@ -116,31 +116,38 @@ def main():
         print('Error: %s' % (e,))
         sys.exit(5)
 
-    print('Twitter and RabbitMQ credentials loaded correctly from environment')
-    print('Checking connection with RabbitMQ (%s:%s)...' % (rmq_host, rmq_port))
+    logger.info('Twitter and RabbitMQ credentials loaded correctly from environment')
+    logger.info('Checking connection with RabbitMQ (%s:%s)...' % (rmq_host, rmq_port))
 
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host=rmq_host, port=rmq_port, credentials=pika.PlainCredentials(rmq_user, rmq_password)))
         connection.close()
     except Exception as e:
-        print('Could not connect to RabbitMQ. %s', str(e))
+        print('Could not connect to RabbitMQ. %s' % (e,))
         sys.exit(7)
 
-    print('Connection with RabbitMQ verified successfully')
+    logger.info('Connection with RabbitMQ verified successfully')
 
     rmq_credentials = {'host': rmq_host, 'port': rmq_port, 'user': rmq_user,
                        'password': rmq_password}
 
-    l = TwitterListener(twitter_username, rmq_credentials, queue=queue)
+    l = TwitterListener(twitter_username, rmq_credentials, queue)
     auth = tweepy.OAuthHandler(twitter_consumer_key, twitter_consumer_secret)
     auth.set_access_token(twitter_access_token, twitter_access_token_secret)
 
     logger.info("Queue: %s" % (queue, ))
-    logger.info('Listening to hashtags: {}'.format(hashtags))
+    logger.info('Listening to hashtags: %s' % (', '.join(hashtags),))
 
     stream = tweepy.Stream(auth, l)
+
+    def signal_handler(signal, frame):
+        logger.info('Stopping stream listener gracefully...')
+        stream.disconnect()
+
+    signal.signal(signal.SIGINT, signal_handler)
     stream.filter(track=hashtags)
+
 
 if __name__ == "__main__":
     main()
