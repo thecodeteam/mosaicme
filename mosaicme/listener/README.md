@@ -2,9 +2,17 @@
 
 The MosaicMe Listener service is a Python application that connects to the Twitter Streaming API and listens for tweets containing one or many particular hashtags.
 
-Once the application receives a tweet, it looks for an attached picture and obtains the URL. Then, it is going to send a message to the Engine service.
+Once the application receives a tweet, it looks for an attached picture and obtains the URL. Then, it is going to send a message to the Engine service. The message is formatted in JSON like the following example.
 
-The application is going to discard tweets that belong to the same user that is configured to publish tweets and those tweets that do not contain an image.
+```json
+{
+  "twitter_handler": "johndoe_NYC",
+  "user_name": "John Doe",
+  "img_url": "http://pbs.twimg.com/media/CrMjiYdW8AAHbhG.jpg"
+}
+```
+
+The application is going to discard tweets that belong to the same user that is configured to publish tweets and those that do not contain an image.
 
 ![Flow chart](../../images/mosaicme-listener-flowchart.png)
 
