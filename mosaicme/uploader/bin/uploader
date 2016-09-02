@@ -1,33 +1,16 @@
 #!/usr/bin/env ruby
 require_relative '../config/setup'
-require_relative '../lib/parser'
-require 'sneakers'
-require 'sneakers/runner'
+require_relative '../lib/uploader'
 
 options = Parser.parse ARGV
 
-class UploaderWorker
-  include Sneakers::Worker
-  from_queue 'uploader'
+uploader = Uploader.new(
+  queue: options[:queue],
+  bucket: options[:bucket],
+  rabbitmq_host: ENV['RABBITMQ_HOST'],
+  rabbitmq_port: ENV['RABBITMQ_PORT'],
+  rabbitmq_user: ENV['RABBITMQ_USER'],
+  rabbitmq_password: ENV['RABBITMQ_PASSWORD']
+  )
 
-  def work(message)
-    puts "[MESSAGE] #{message}"
-    ack!
-  end
-end
-
-rabbitmq_host = ENV['RABBITMQ_HOST']
-rabbitmq_port = ENV['RABBITMQ_PORT']
-rabbitmq_user = ENV['RABBITMQ_USER']
-rabbitmq_password = ENV['RABBITMQ_PASSWORD']
-
-Sneakers.configure(
-  amqp: "amqp://#{rabbitmq_user}:#{rabbitmq_password}@#{rabbitmq_host}:#{rabbitmq_port}",
-  daemonize: false,
-  log: STDOUT,
-  workers: 1,
-)
-Sneakers.logger.level = Logger::WARN
-
-r = Sneakers::Runner.new([ UploaderWorker ])
-r.run
+uploader.start()

@@ -4,8 +4,6 @@ GEM
     amq-protocol (2.0.1)
     bunny (2.2.2)
       amq-protocol (>= 2.0.1)
-    figaro (1.1.1)
-      thor (~> 0.14)
     serverengine (1.5.11)
       sigdump (~> 0.2.2)
     sigdump (0.2.4)
@@ -21,7 +19,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  figaro (= 1.1.1)
   sneakers (= 2.3.5)
 
 BUNDLED WITH
