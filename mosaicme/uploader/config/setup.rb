@@ -25,12 +25,9 @@ class Parser
     end
 
     opt_parser.parse!(options)
-    if args.queue.nil? or args.bucket.nil?
-      puts 'Missing required argument'
-      puts ''
-      puts opt_parser
-      exit
-    end
+
+    raise ArgumentError, "Missing queue." if !args.queue
+    raise ArgumentError, "Missing bucket." if !args.bucket
 
     return args
   end

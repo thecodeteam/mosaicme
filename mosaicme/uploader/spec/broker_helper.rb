@@ -8,7 +8,7 @@ channel = connection.create_channel
 
 queue = channel.queue 'uploader', durable: true
 
-json = { img_url: 'http://abc.com' }.to_json
+json = { img_url: 'http://kingofwallpapers.com/coche/coche-002.jpg' }.to_json
 queue.publish json
 
 connection.close

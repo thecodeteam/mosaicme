@@ -6,12 +6,10 @@ class Uploader
 
   def initialize(queue:, bucket:, rabbitmq_host:, rabbitmq_port:, rabbitmq_user:, rabbitmq_password:)
     ENV['LISTEN_QUEUE'] = queue
-    puts "queue = #{queue}"
     ENV['UPLOAD_BUCKET'] = bucket
-    amqp_url = "amqp://#{rabbitmq_user}:#{rabbitmq_password}@#{rabbitmq_host}:#{rabbitmq_port}"
 
     Sneakers.configure(
-      amqp: amqp_url,
+      amqp: "amqp://#{rabbitmq_user}:#{rabbitmq_password}@#{rabbitmq_host}:#{rabbitmq_port}",
       daemonize: false,
       log: STDOUT,
       workers: 1,
