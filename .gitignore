@@ -20,6 +20,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+*.gem
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -57,7 +58,7 @@ target/
 .vagrant/
 
 # dotenv
-.env
+*.env
 
 # JetBrains IDE
 .idea/

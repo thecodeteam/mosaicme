@@ -1,16 +1,54 @@
 #!/usr/bin/env ruby
-require_relative '../config/setup'
-require_relative '../lib/uploader'
+require 'optparse'
+require 'uploader'
 
-options = Parser.parse ARGV
+options = {}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: uploader.rb -q QUEUE_NAME -b BUCKET_NAME [-h/--help]"
 
-uploader = Uploader.new(
+  opts.on("-q", "--queue QUEUE_NAME", "RabbitMQ queue name") do |q|
+    options[:queue] = q
+  end
+
+  opts.on("-b", "--bucket BUCKET_NAME", "Object store bucket where the image will be uploaded") do |b|
+    options[:bucket] = b
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+
+  opts.on("-v", "--version", "Prints the program version") do
+    puts "Uploader version #{Uploader::VERSION}"
+    exit
+  end
+end
+
+begin
+  opt_parser.parse!
+  mandatory = [:queue, :bucket]
+  missing = mandatory.select{ |param| options[param].nil? }
+  unless missing.empty?
+    raise OptionParser::MissingArgument.new(missing.join(', '))
+  end
+  raise ArgumentError, 'Missing RABBITMQ_HOST environment variable' if !ENV['RABBITMQ_HOST']
+  raise ArgumentError, 'Missing RABBITMQ_PORT environment variable' if !ENV['RABBITMQ_PORT']
+  raise ArgumentError, 'Missing RABBITMQ_USER environment variable' if !ENV['RABBITMQ_USER']
+  raise ArgumentError, 'Missing RABBITMQ_PASSWORD environment variable' if !ENV['RABBITMQ_PASSWORD']
+  raise ArgumentError, 'Missing S3_ACCESS_KEY environment variable' if !ENV['S3_ACCESS_KEY']
+  raise ArgumentError, 'Missing S3_SECRET_KEY environment variable' if !ENV['S3_SECRET_KEY']
+  raise ArgumentError, 'Missing S3_REGION environment variable' if !ENV['S3_REGION']
+  raise ArgumentError, 'Missing S3_HOST environment variable' if !ENV['S3_HOST']
+  raise ArgumentError, 'Missing S3_PORT environment variable' if !ENV['S3_PORT']
+rescue OptionParser::MissingArgument, OptionParser::InvalidOption, ArgumentError
+  puts $!.to_s
+  puts
+  puts opt_parser
+  exit 1
+end
+
+uploader = Uploader.start(
   queue: options[:queue],
-  bucket: options[:bucket],
-  rabbitmq_host: ENV['RABBITMQ_HOST'],
-  rabbitmq_port: ENV['RABBITMQ_PORT'],
-  rabbitmq_user: ENV['RABBITMQ_USER'],
-  rabbitmq_password: ENV['RABBITMQ_PASSWORD']
+  bucket: options[:bucket]
   )
-
-uploader.start()

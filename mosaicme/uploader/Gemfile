@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem "sneakers", "= 2.3.5"
-gem "bunny", "=2.2.2"
-gem "aws-sdk", "=2.5.8"
+gem "sneakers", "~>2.3"
+gem "bunny", "~>2.2"
+gem "aws-sdk", "~>2.5"
