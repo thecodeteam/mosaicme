@@ -4,7 +4,7 @@ require 'uploader'
 
 options = {}
 opt_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: uploader.rb -q QUEUE_NAME -b BUCKET_NAME [-h/--help]"
+  opts.banner = "Usage: uploader -q QUEUE_NAME -b BUCKET_NAME [-h/--help]"
 
   opts.on("-q", "--queue QUEUE_NAME", "RabbitMQ queue name") do |q|
     options[:queue] = q

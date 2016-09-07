@@ -20,11 +20,12 @@ This service will obtain the image and upload it to a particular bucket in the o
 ## Usage
 
 ```
-$ ruby bin/uploader --help
-Usage: uploader.rb -q QUEUE_NAME -b BUCKET_NAME [-h/--help]
+$ uploader --help
+Usage: uploader -q QUEUE_NAME -b BUCKET_NAME [-h/--help]
     -q, --queue QUEUE_NAME           RabbitMQ queue name
     -b, --bucket BUCKET_NAME         Object store bucket where the image will be uploaded
     -h, --help                       Prints this help
+    -v, --version                    Prints the program version
 ```
 
 The app expects the following environment variables, corresponding to the RabbitMQ and S3-compatible object store credentials.
