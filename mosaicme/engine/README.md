@@ -100,7 +100,7 @@ S3_SECRET_KEY=1234
 S3_HOST=localhost
 S3_PORT=4569
 S3_REGION=local
-S3_BUCKET_RAW=mosaic-raw`
+S3_BUCKET_RAW=mosaic-raw
 S3_BUCKET_MOSAIC=mosaic-out 
 QUEUE_NAME=mosaic-queue
 ```
