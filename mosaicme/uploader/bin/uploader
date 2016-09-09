@@ -32,23 +32,19 @@ begin
   unless missing.empty?
     raise OptionParser::MissingArgument.new(missing.join(', '))
   end
-  raise ArgumentError, 'Missing RABBITMQ_HOST environment variable' if !ENV['RABBITMQ_HOST']
-  raise ArgumentError, 'Missing RABBITMQ_PORT environment variable' if !ENV['RABBITMQ_PORT']
-  raise ArgumentError, 'Missing RABBITMQ_USER environment variable' if !ENV['RABBITMQ_USER']
-  raise ArgumentError, 'Missing RABBITMQ_PASSWORD environment variable' if !ENV['RABBITMQ_PASSWORD']
-  raise ArgumentError, 'Missing S3_ACCESS_KEY environment variable' if !ENV['S3_ACCESS_KEY']
-  raise ArgumentError, 'Missing S3_SECRET_KEY environment variable' if !ENV['S3_SECRET_KEY']
-  raise ArgumentError, 'Missing S3_REGION environment variable' if !ENV['S3_REGION']
-  raise ArgumentError, 'Missing S3_HOST environment variable' if !ENV['S3_HOST']
-  raise ArgumentError, 'Missing S3_PORT environment variable' if !ENV['S3_PORT']
-rescue OptionParser::MissingArgument, OptionParser::InvalidOption, ArgumentError
+rescue OptionParser::MissingArgument, OptionParser::InvalidOption
   puts $!.to_s
   puts
   puts opt_parser
   exit 1
 end
 
-uploader = Uploader.start(
-  queue: options[:queue],
-  bucket: options[:bucket]
-  )
+begin
+  Uploader.start(
+    queue: options[:queue],
+    bucket: options[:bucket]
+    )
+rescue ArgumentError
+  puts $!.to_s
+  exit 1
+end
