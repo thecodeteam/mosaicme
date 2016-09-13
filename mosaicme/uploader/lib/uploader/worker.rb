@@ -4,38 +4,35 @@ require 'json'
 require 'aws-sdk'
 require 'open-uri'
 
-class UploaderWorker
-  include Sneakers::Worker
-  from_queue ENV['LISTEN_QUEUE']
+module Uploader
 
-  def work(message)
-    logger.info "[MESSAGE] #{message}"
-    data = JSON.parse(message)
-    if data.key?('img_url')
-      upload(data['img_url'])
-    end
-    ack!
-  end
+  class UploaderWorker
+    include Sneakers::Worker
+    from_queue Uploader.queue
 
-  private
-
-  def upload(img_url)
-    logger.info "Uploading img url: #{img_url}"
-
-    s3 = Aws::S3::Client.new(
-        :access_key_id => ENV['S3_ACCESS_KEY'],
-        :secret_access_key => ENV['S3_SECRET_KEY'],
-        :region => 'local',
-        :endpoint => "http://#{ENV['S3_HOST']}:#{ENV['S3_PORT']}/",
-        :force_path_style => true)
-
-    begin
-      s3.head_bucket({bucket: ENV['UPLOAD_BUCKET']})
-    rescue Aws::S3::Errors::NotFound
-      puts 'Bucket does not exist. Creating it...'
-      s3.create_bucket({bucket: ENV['UPLOAD_BUCKET']})
+    def work(message)
+      logger.debug "[MESSAGE] #{message}"
+      data = JSON.parse(message)
+      if data.key?('img_url')
+        upload(data['img_url'])
+      end
+      ack!
     end
 
-    s3.put_object({bucket: ENV['UPLOAD_BUCKET'], key: File.basename(img_url), body: open(img_url)})
+    private
+
+    def upload(img_url)
+      logger.info "Uploading image '#{img_url}' to bucket '#{Uploader.bucket}'"
+
+      begin
+        Uploader.s3_client.head_bucket({bucket: Uploader.bucket})
+      rescue Aws::S3::Errors::NotFound
+        logger.debug 'Bucket does not exist. Creating it...'
+        Uploader.s3_client.create_bucket({bucket: Uploader.bucket})
+      end
+
+      Uploader.s3_client.put_object({bucket: Uploader.bucket, key: File.basename(img_url), body: open(img_url)})
+      logger.debug 'Image uploaded'
+    end
   end
 end
