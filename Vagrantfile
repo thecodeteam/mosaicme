@@ -9,16 +9,18 @@ Vagrant.configure(2) do |config|
   # Django app
   config.vm.network "forwarded_port", guest: 8000, host: 8000
 
-  config.vm.synced_folder ".", "/home/vagrant/mosaicme"
+  config.vm.synced_folder ".", "/home/vagrant/src"
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "1024"
   end
 
-  config.vm.provision "file", source: "requirements.txt", destination: "/tmp/requirements.txt"
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y git curl
+    sudo apt-get install -y python3 python3-dev python3-pip
 
-  config.vm.provision :puppet do |puppet|
-    puppet.manifests_path = "puppet/manifests"
-    puppet.module_path = 'puppet/modules'
-  end
+    sudo pip3 install virtualenv
+    
+  SHELL
 end

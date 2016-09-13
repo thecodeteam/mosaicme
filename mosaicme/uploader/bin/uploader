@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require 'uploader'
+
+options = {}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: uploader -q QUEUE_NAME -b BUCKET_NAME [-h/--help]"
+
+  opts.on("-q", "--queue QUEUE_NAME", "RabbitMQ queue name") do |q|
+    options[:queue] = q
+  end
+
+  opts.on("-b", "--bucket BUCKET_NAME", "Object store bucket where the image will be uploaded") do |b|
+    options[:bucket] = b
+  end
+
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+
+  opts.on("-v", "--version", "Prints the program version") do
+    puts "Uploader version #{Uploader::VERSION}"
+    exit
+  end
+end
+
+begin
+  opt_parser.parse!
+  mandatory = [:queue, :bucket]
+  missing = mandatory.select{ |param| options[param].nil? }
+  unless missing.empty?
+    raise OptionParser::MissingArgument.new(missing.join(', '))
+  end
+rescue OptionParser::MissingArgument, OptionParser::InvalidOption
+  puts $!.to_s
+  puts
+  puts opt_parser
+  exit 1
+end
+
+begin
+  Uploader.start(
+    queue: options[:queue],
+    bucket: options[:bucket]
+    )
+rescue ArgumentError
+  puts $!.to_s
+  exit 1
+end
