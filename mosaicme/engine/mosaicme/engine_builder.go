@@ -2,7 +2,13 @@ package mosaicme
 
 import (
   "encoding/json"
+  "fmt"
+  "io"
   "log"
+  "net/http"
+  "os"
+  "os/exec"
+  "path"
   "time"
 )
 
@@ -18,9 +24,22 @@ func (e *Engine) builder() {
     e.wg.Done()
   }()
 
+  var err error
+  rawDir := path.Join(baseDir, "raw")
+  tilesDir := path.Join(baseDir, "tiles")
+  sourceDir := path.Join(baseDir, "source")
+  mosaicsDir := path.Join(baseDir, "mosaics")
+  thumbnailsDir := path.Join(baseDir, "thumbnails")
   consumerTag := "engine"
 
-  log.Printf("Queue bound to Exchange, starting Consume (consumer tag %q)", consumerTag)
+  log.Printf("Creating tiles into\n")
+  if err = e.createTiles(); err != nil {
+    log.Printf("Error creating tiles: %s\n", err)
+    close(e.stopchan)
+    return
+  }
+
+  log.Printf("Starting queue consumer (consumer tag %q)", consumerTag)
   deliveries, err := e.channel.Consume(
     e.config.QueueName, // name
     consumerTag,        // consumerTag,
@@ -40,12 +59,20 @@ func (e *Engine) builder() {
   for {
     select {
     case d := <-deliveries:
-      log.Printf(
-        "got %dB delivery: [%v] %q",
-        len(d.Body),
-        d.DeliveryTag,
-        d.Body,
-      )
+
+      var m Message
+      err := json.Unmarshal(d, &m)
+      if err != nil {
+        return err
+      }
+
+      e.downloadSource(m.ImgURL)
+
+      log.Printf("Building mosaic...\n")
+      if err := e.buildMosaic(d.Body); err != nil {
+        log.Printf("Error parsing message to JSON: %s\n", err)
+        continue
+      }
 
       if err := e.buildMosaic(d.Body); err != nil {
         log.Printf("Error parsing message to JSON: %s\n", err)
@@ -75,14 +102,56 @@ func (e *Engine) builder() {
   }
 }
 
-func (e *Engine) buildMosaic(data []byte) error {
-  var m Message
-  err := json.Unmarshal(data, &m)
+func (e *Engine) createTiles() error {
+  cmd := "metapixel-prepare"
+  args := []string{rawDir, tilesDir, "--width=32", "--height=32"}
+  if err := exec.Command(cmd, args...).Run(); err != nil {
+    fmt.Fprintln(os.Stderr, err)
+    return err
+  }
+  return nil
+}
+
+func (e *Engine) downloadSource(sourceUrl, downloadPath string) error {
+  // Create the file
+  out, err := os.Create(downloadPath)
   if err != nil {
     return err
   }
-  log.Printf("Message: %+v\n", m)
+  defer out.Close()
 
-  //TODO: build mosaic with metapixel
+  // Get the data
+  resp, err := http.Get(sourceUrl)
+  if err != nil {
+    return err
+  }
+  defer resp.Body.Close()
+
+  // Writer the body to file
+  _, err = io.Copy(out, resp.Body)
+  if err != nil {
+    return err
+  }
+
+  return nil
+}
+
+func (e *Engine) buildMosaic(sourcePath, mosaicPath, tilesDir string) error {
+  cmd = "metapixel"
+  args = []string{"--metapixel", sourcePath, mosaicPath, "--library", tilesDir, "--scale=10", "--distance=5"}
+  if err := exec.Command(cmd, args...).Run(); err != nil {
+    fmt.Fprintln(os.Stderr, err)
+    return err
+  }
+  return nil
+}
+
+func (e *Engine) createThumbnail(mosaicPath, thumbnailPath string) error {
+  cmd = "convert"
+  args = []string{"-thumbnail", "400", mosaicPath, thumbnailPath}
+  if err := exec.Command(cmd, args...).Run(); err != nil {
+    fmt.Fprintln(os.Stderr, err)
+    return err
+  }
   return nil
 }

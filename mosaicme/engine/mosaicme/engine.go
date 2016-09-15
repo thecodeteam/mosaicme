@@ -8,6 +8,10 @@ import (
   "github.com/streadway/amqp"
 )
 
+const (
+  baseDir = "/tmp/mosaicme"
+)
+
 type Config struct {
   QueueName      string
   BucketName     string
@@ -19,6 +23,7 @@ type Config struct {
   RabbitPassword string `env:"RABBITMQ_PASSWORD,required"`
   S3Host         string `env:"S3_HOST,required"`
   S3Port         string `env:"S3_PORT,required"`
+  S3Https        bool   `env:"S3_HTTPS,required"`
   S3AccessKey    string `env:"S3_ACCESS_KEY,required"`
   S3SecrectKey   string `env:"S3_SECRET_KEY,required"`
 }
@@ -42,6 +47,18 @@ func NewEngine(config *Config) (*Engine, error) {
     config:   config,
   }
 
+  if err = e.initQueue(); err != nil {
+    return nil, err
+  }
+
+  if err = e.initObjectStorage(); err != nil {
+    return nil, err
+  }
+
+  return e, nil
+}
+
+func (e *Engine) initQueue() error {
   key := "test-key"
   exchange := "mosaicme"
   amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%s",
@@ -50,7 +67,7 @@ func NewEngine(config *Config) (*Engine, error) {
 
   e.amqpConn, err = amqp.Dial(amqpURI)
   if err != nil {
-    return nil, fmt.Errorf("Dial: %s", err)
+    return fmt.Errorf("Dial: %s", err)
   }
 
   go func() {
@@ -60,7 +77,7 @@ func NewEngine(config *Config) (*Engine, error) {
   log.Printf("got Connection, getting Channel")
   e.channel, err = e.amqpConn.Channel()
   if err != nil {
-    return nil, fmt.Errorf("Channel: %s", err)
+    return fmt.Errorf("Channel: %s", err)
   }
 
   log.Printf("got Channel, declaring Exchange (%q)", exchange)
@@ -73,7 +90,7 @@ func NewEngine(config *Config) (*Engine, error) {
     false,    // noWait
     nil,      // arguments
   ); err != nil {
-    return nil, fmt.Errorf("Exchange Declare: %s", err)
+    return fmt.Errorf("Exchange Declare: %s", err)
   }
 
   log.Printf("declared Exchange, declaring Queue %q", e.config.QueueName)
@@ -86,7 +103,7 @@ func NewEngine(config *Config) (*Engine, error) {
     nil,                // arguments
   )
   if err != nil {
-    return nil, fmt.Errorf("Queue Declare: %s", err)
+    return fmt.Errorf("Queue Declare: %s", err)
   }
 
   log.Printf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
@@ -99,14 +116,18 @@ func NewEngine(config *Config) (*Engine, error) {
     false,              // noWait
     nil,                // arguments
   ); err != nil {
-    return nil, fmt.Errorf("Queue Bind: %s", err)
+    return fmt.Errorf("Queue Bind: %s", err)
   }
+  return nil
+}
 
-  return e, nil
+func (e *Engine) initObjectStorage() error {
+  //TODO: Initilize S3 client here
+  return nil
 }
 
 func (e *Engine) Start() error {
-  go e.download()
+  // go e.download()
   go e.builder()
   go e.uploader()
   return nil
