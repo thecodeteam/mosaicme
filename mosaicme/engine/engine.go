@@ -16,6 +16,8 @@ var (
   cfg = mosaicme.Config{
     QueueName:  *flag.String("queue", "engine", "Queue name"),
     BucketName: *flag.String("bucket", "mosaics", "Bucket name"),
+    BucketRawName: *flag.String("bucketraw", "mosaics-raw", "Bucket raw name"),
+    EngineDir: *flag.String("enginedir", "/engine/", "Engine Dir  name"),
   }
 )
 

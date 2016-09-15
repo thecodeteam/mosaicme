@@ -4,4 +4,8 @@ MAINTAINER Magdy Salem <magdy.salem@emc.com>
 
 RUN apt-get update &&\
   apt-get -y install metapixel imagemagick &&\
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/* &&\
+  mkdir /engine &&\
+  mkdir /engine/raw &&\
+  mkdir /engine/tiles &&\
+  mkdir /engine/mosaic   

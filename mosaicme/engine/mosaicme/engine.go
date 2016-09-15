@@ -11,10 +11,16 @@ import (
 type Config struct {
   QueueName      string
   BucketName     string
+  BucketRawName  string
+  EngineDir      string
   RabbitHost     string `env:"RABBITMQ_HOST,required"`
   RabbitPort     string `env:"RABBITMQ_PORT,required"`
   RabbitUser     string `env:"RABBITMQ_USER,required"`
   RabbitPassword string `env:"RABBITMQ_PASSWORD,required"`
+  S3Host         string `env:"S3_HOST,required"`
+  S3Port         string `env:"S3_PORT,required"`
+  S3AccessKey    string `env:"S3_ACCESS_KEY,required"`
+  S3SecrectKey   string `env:"S3_SECRET_KEY,required"`
 }
 
 type Engine struct {
@@ -100,6 +106,7 @@ func NewEngine(config *Config) (*Engine, error) {
 }
 
 func (e *Engine) Start() error {
+  go e.download()
   go e.builder()
   go e.uploader()
   return nil
