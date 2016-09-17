@@ -8,17 +8,23 @@ import (
   "github.com/streadway/amqp"
 )
 
+const (
+  baseDir = "/tmp/mosaicme"
+)
+
 type Config struct {
-  QueueName      string
-  BucketName     string
-  BucketRawName  string
-  EngineDir      string
+  QueueInName    string
+  QueueOutName   string
+  BucketInName   string
+  BucketOutName  string
+  mosaicFileName string
   RabbitHost     string `env:"RABBITMQ_HOST,required"`
   RabbitPort     string `env:"RABBITMQ_PORT,required"`
   RabbitUser     string `env:"RABBITMQ_USER,required"`
   RabbitPassword string `env:"RABBITMQ_PASSWORD,required"`
   S3Host         string `env:"S3_HOST,required"`
   S3Port         string `env:"S3_PORT,required"`
+  S3Https        bool   `env:"S3_HTTPS,required"`
   S3AccessKey    string `env:"S3_ACCESS_KEY,required"`
   S3SecrectKey   string `env:"S3_SECRET_KEY,required"`
 }
@@ -42,7 +48,20 @@ func NewEngine(config *Config) (*Engine, error) {
     config:   config,
   }
 
-  key := "test-key"
+  if err = e.initQueue(); err != nil {
+    return nil, err
+  }
+
+  if err = e.initObjectStorage(); err != nil {
+    return nil, err
+  }
+
+  return e, nil
+}
+
+func (e *Engine) initQueue() error {
+  keyIn := "engine-in-key"
+  keyOut := "engine-out-key"
   exchange := "mosaicme"
   amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%s",
     e.config.RabbitUser, e.config.RabbitPassword,
@@ -50,7 +69,7 @@ func NewEngine(config *Config) (*Engine, error) {
 
   e.amqpConn, err = amqp.Dial(amqpURI)
   if err != nil {
-    return nil, fmt.Errorf("Dial: %s", err)
+    return fmt.Errorf("Dial: %s", err)
   }
 
   go func() {
@@ -60,7 +79,7 @@ func NewEngine(config *Config) (*Engine, error) {
   log.Printf("got Connection, getting Channel")
   e.channel, err = e.amqpConn.Channel()
   if err != nil {
-    return nil, fmt.Errorf("Channel: %s", err)
+    return fmt.Errorf("Channel: %s", err)
   }
 
   log.Printf("got Channel, declaring Exchange (%q)", exchange)
@@ -73,12 +92,12 @@ func NewEngine(config *Config) (*Engine, error) {
     false,    // noWait
     nil,      // arguments
   ); err != nil {
-    return nil, fmt.Errorf("Exchange Declare: %s", err)
+    return fmt.Errorf("Exchange Declare: %s", err)
   }
 
-  log.Printf("declared Exchange, declaring Queue %q", e.config.QueueName)
+  log.Printf("declared Exchange, declaring Queue-In %q", e.config.QueueInName)
   queue, err := e.channel.QueueDeclare(
-    e.config.QueueName, // name of the queue
+    e.config.QueueInName, // name of the queue
     true,               // durable
     false,              // delete when usused
     false,              // exclusive
@@ -86,29 +105,66 @@ func NewEngine(config *Config) (*Engine, error) {
     nil,                // arguments
   )
   if err != nil {
-    return nil, fmt.Errorf("Queue Declare: %s", err)
+    return fmt.Errorf("Queue-in Declare: %s", err)
   }
 
-  log.Printf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
-    e.config.QueueName, queue.Messages, queue.Consumers, key)
 
+  log.Printf("declared Queue-In (%q %d messages, %d consumers), binding to Exchange (key %q)",
+    e.config.QueueInName, queue.Messages, queue.Consumers, keyIn)
+
+//Bind Queue-in with Exchange
   if err = e.channel.QueueBind(
-    e.config.QueueName, // name of the queue
-    key,                // bindingKey
+    e.config.QueueInName, // name of the queue
+    keyIn,                // bindingKey
     exchange,           // sourceExchange
     false,              // noWait
     nil,                // arguments
   ); err != nil {
-    return nil, fmt.Errorf("Queue Bind: %s", err)
+    return fmt.Errorf("Queue Bind: %s", err)
+  }
+  log.Printf("declared Exchange, declaring Queue-Out %q", e.config.QueueOutName)
+  queue2, err := e.channel.QueueDeclare(
+    e.config.QueueOutName, // name of the queue
+    true,               // durable
+    false,              // delete when usused
+    false,              // exclusive
+    false,              // noWait
+    nil,                // arguments
+  )
+  if err != nil {
+    return fmt.Errorf("Queue-Out Declare: %s", err)
   }
 
-  return e, nil
+  log.Printf("declared Queue-Out (%q %d messages, %d consumers), binding to Exchange (key %q)",
+    e.config.QueueOutName, queue2.Messages, queue2.Consumers, keyOut)
+
+//Bind Queue-out with Exchange
+  if err = e.channel.QueueBind(
+    e.config.QueueOutName, // name of the queue
+    keyOut,                // bindingKey
+    exchange,           // sourceExchange
+    false,              // noWait
+    nil,                // arguments
+  ); err != nil {
+    return fmt.Errorf("Queue Bind: %s", err)
+  }
+
+
+  return nil
+}
+
+func (e *Engine) initObjectStorage() error {
+  //TODO: Initilize S3 client here
+  return nil
 }
 
 func (e *Engine) Start() error {
+  // download raw images
   go e.download()
+
+  // run builder
   go e.builder()
-  go e.uploader()
+
   return nil
 }
 
