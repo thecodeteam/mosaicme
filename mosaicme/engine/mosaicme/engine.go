@@ -60,8 +60,12 @@ func NewEngine(config *Config) (*Engine, error) {
 }
 
 func (e *Engine) initQueue() error {
+<<<<<<< HEAD
   keyIn := "engine-in-key"
   keyOut := "engine-out-key"
+=======
+  key := "test-key"
+>>>>>>> service/engine
   exchange := "mosaicme"
   amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%s",
     e.config.RabbitUser, e.config.RabbitPassword,
@@ -132,7 +136,11 @@ func (e *Engine) initQueue() error {
     nil,                // arguments
   )
   if err != nil {
+<<<<<<< HEAD
     return fmt.Errorf("Queue-Out Declare: %s", err)
+=======
+    return fmt.Errorf("Queue Declare: %s", err)
+>>>>>>> service/engine
   }
 
   log.Printf("declared Queue-Out (%q %d messages, %d consumers), binding to Exchange (key %q)",
@@ -148,21 +156,30 @@ func (e *Engine) initQueue() error {
   ); err != nil {
     return fmt.Errorf("Queue Bind: %s", err)
   }
+  return nil
+}
 
+<<<<<<< HEAD
 
   return nil
 }
 
+=======
+>>>>>>> service/engine
 func (e *Engine) initObjectStorage() error {
   //TODO: Initilize S3 client here
   return nil
 }
 
 func (e *Engine) Start() error {
+<<<<<<< HEAD
   // download raw images
   go e.download()
 
   // run builder
+=======
+  // go e.download()
+>>>>>>> service/engine
   go e.builder()
 
   return nil

@@ -9,14 +9,12 @@ import (
   "os"
   "os/exec"
   "path"
-  "time"
-
 )
 
 type Message struct {
   TwitterHandler string `json:"twitter_handler"`
   UserName       string `json:"user_name"`
-  ImgURL         string `json:"img_url"`  // this could be tweet imge as income or presign url as outcome msg
+  ImgURL         string `json:"img_url"` // this could be tweet imge as income or presign url as outcome msg
 }
 
 func (e *Engine) builder() {
@@ -26,12 +24,11 @@ func (e *Engine) builder() {
   }()
 
   var err error
-  rawDir := path.Join(baseDir, "raw")  //raw images downloaded from S3
-  tilesDir := path.Join(baseDir, "tiles") // tiles location to store generated tiles images by metapixel
-  sourceDir := path.Join(baseDir, "source") // location to store the original pic to be processed to mosaic
-  mosaicsDir := path.Join(baseDir, "mosaics") // location to store the new generated mosaic image
+  rawDir := path.Join(baseDir, "raw")               //raw images downloaded from S3
+  tilesDir := path.Join(baseDir, "tiles")           // tiles location to store generated tiles images by metapixel
+  sourceDir := path.Join(baseDir, "source")         // location to store the original pic to be processed to mosaic
+  mosaicsDir := path.Join(baseDir, "mosaics")       // location to store the new generated mosaic image
   thumbnailsDir := path.Join(baseDir, "thumbnails") // location to store the thumnails for to display it on the website
-
   consumerTag := "engine"
 
   log.Printf("Creating tiles into\n")
@@ -44,12 +41,12 @@ func (e *Engine) builder() {
   log.Printf("Starting queue consumer (consumer tag %q)", consumerTag)
   deliveries, err := e.channel.Consume(
     e.config.QueueInName, // name
-    consumerTag,        // consumerTag,
-    false,              // noAck
-    false,              // exclusive
-    false,              // noLocal
-    false,              // noWait
-    nil,                // arguments
+    consumerTag,          // consumerTag,
+    false,                // noAck
+    false,                // exclusive
+    false,                // noLocal
+    false,                // noWait
+    nil,                  // arguments
   )
   if err != nil {
     log.Printf("Queue Consume Error: %s\n", err)
@@ -63,15 +60,18 @@ func (e *Engine) builder() {
     case d := <-deliveries:
 
       var m Message
+      var string mosaicSource
+
       err := json.Unmarshal(d, &m)
       if err != nil {
         return err
       }
 
-      e.config.mosaicFileName,err = e.downloadSource(m.ImgURL,sourceDir)
+      mosaicSource, err = e.downloadSource(m.ImgURL, sourceDir)
       if err != nil {
         return err
       }
+
       log.Printf("Building mosaic...\n")
       if err := e.buildMosaic(d.Body); err != nil {
         log.Printf("Error parsing message to JSON: %s\n", err)
@@ -116,28 +116,28 @@ func (e *Engine) createTiles() error {
   return nil
 }
 
-func (e *Engine) downloadSource(sourceUrl string, downloadPath string)  ( string, error) {
+func (e *Engine) downloadSource(sourceUrl string, downloadPath string) (string, error) {
   // Create the file
   out, err := os.Create(downloadPath)
   if err != nil {
-    return err
+    return nil, err
   }
   defer out.Close()
 
   // Get the data
   resp, err := http.Get(sourceUrl)
   if err != nil {
-    return err
+    return nil, err
   }
   defer resp.Body.Close()
 
   // Writer the body to file
   _, err = io.Copy(out, resp.Body)
   if err != nil {
-    return err
+    return nil, err
   }
-  //return file name
-  return out.Name()
+
+  return out.Name(), nil
 }
 
 func (e *Engine) buildMosaic(sourcePath, mosaicPath, tilesDir string) error {

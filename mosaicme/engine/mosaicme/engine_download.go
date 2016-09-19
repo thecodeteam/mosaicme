@@ -4,8 +4,8 @@ import (
   "io"
   "log"
   "os"
+  "path"
   "time"
-  "github.com/minio/minio-go"
 )
 
 func (e *Engine) download() {
