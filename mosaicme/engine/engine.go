@@ -14,10 +14,10 @@ import (
 
 var (
   cfg = mosaicme.Config{
-    QueueName:  *flag.String("queue", "engine", "Queue name"),
-    BucketName: *flag.String("bucket", "mosaics", "Bucket name"),
-    BucketRawName: *flag.String("bucketraw", "mosaics-raw", "Bucket raw name"),
-    EngineDir: *flag.String("enginedir", "/engine/", "Engine Dir  name"),
+    QueueInName:  *flag.String("queue", "engine-in", "Queue name"),
+    QueueOutName:  *flag.String("queue", "engine-out", "Queue name"),
+    BucketInName: *flag.String("bucketraw", "mosaics-raw", "Bucket raw name"),
+    BucketOutName: *flag.String("bucket", "mosaics-out", "Bucket name"),
   }
 )
 

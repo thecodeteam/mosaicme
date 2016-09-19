@@ -4,6 +4,7 @@ import (
   "io"
   "log"
   "os"
+  "path"
   "time"
 )
 
@@ -17,7 +18,7 @@ func (e *Engine) download() {
   for {
     select {
     default:
-      engineRawDir := e.config.EngineDir + "/raw/"
+      rawDir := path.Join(baseDir, "raw")
       s3Host := e.config.S3Host + ":" + e.config.S3Port
 
       time.Sleep(30000 * time.Millisecond)
@@ -39,7 +40,7 @@ func (e *Engine) download() {
         }
         log.Println("Found object " + object.Key)
 
-        var localFilename = engineRawDir + object.Key
+        var localFilename = rawDir + object.Key
 
         if _, err := os.Stat(localFilename); os.IsNotExist(err) {
 
