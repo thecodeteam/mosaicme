@@ -1,10 +1,10 @@
 package main
 
 import (
-  "app/mosaicme"
   "flag"
   "fmt"
   "log"
+  "mosaicme"
   "os"
   "os/signal"
   "syscall"
@@ -14,10 +14,10 @@ import (
 
 var (
   cfg = mosaicme.Config{
-    QueueInName:  *flag.String("queue", "engine-in", "Queue name"),
-    QueueOutName:  *flag.String("queue", "engine-out", "Queue name"),
-    BucketInName: *flag.String("bucketraw", "mosaics-raw", "Bucket raw name"),
-    BucketOutName: *flag.String("bucket", "mosaics-out", "Bucket name"),
+    QueueIn:   *flag.String("queue-in", "engine", "Input queue to receive jobs"),
+    QueueOut:  *flag.String("queue-out", "publisher", "Output queue"),
+    BucketIn:  *flag.String("bucket-in", "mosaics-raw", "Bucket for raw images"),
+    BucketOut: *flag.String("bucket-out", "mosaics-out", "Bucket for mosaics"),
   }
 )
 

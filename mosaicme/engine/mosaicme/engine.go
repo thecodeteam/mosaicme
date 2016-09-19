@@ -3,21 +3,33 @@ package mosaicme
 import (
   "fmt"
   "log"
+  "os"
+  "path"
   "sync"
 
+  minio "github.com/minio/minio-go"
   "github.com/streadway/amqp"
 )
 
 const (
-  baseDir = "/tmp/mosaicme"
+  // directory to store the new generated mosaic image
+  mosaicsDir = "mosaics"
+  // directory to store raw images downloaded from object store
+  rawDir = "raw"
+  // directory to store tiles generated from raw images by metapixel to build mosaics
+  tilesDir = "tiles"
+  // directory to store the original images to be processed
+  sourceDir = "source"
+  // direcoty to store the thumbnails to display it on the website
+  thumbnailsDir = "thumbnails"
 )
 
 type Config struct {
-  QueueInName    string
-  QueueOutName   string
-  BucketInName   string
-  BucketOutName  string
-  mosaicFileName string
+  QueueIn        string
+  QueueOut       string
+  BucketIn       string
+  BucketOut      string
+  BaseDir        string `env:"MOSAICME_BASEDIR" envDefault:"/tmp/mosaicme"`
   RabbitHost     string `env:"RABBITMQ_HOST,required"`
   RabbitPort     string `env:"RABBITMQ_PORT,required"`
   RabbitUser     string `env:"RABBITMQ_USER,required"`
@@ -29,26 +41,43 @@ type Config struct {
   S3SecrectKey   string `env:"S3_SECRET_KEY,required"`
 }
 
+type Message struct {
+  TwitterHandler string `json:"twitter_handler"`
+  UserName       string `json:"user_name"`
+  ImgURL         string `json:"img_url"`
+  MosaicName     string
+  MosaicPath     string
+  ThumbnailPath  string
+}
+
 type Engine struct {
-  config   *Config
-  wg       *sync.WaitGroup
-  stopchan chan bool
-  amqpConn *amqp.Connection
-  channel  *amqp.Channel
+  config       *Config
+  wg           *sync.WaitGroup
+  stopchan     chan bool
+  amqpConn     *amqp.Connection
+  channel      *amqp.Channel
+  uploaderChan chan *Message
+  s3Client     *minio.Client
 }
 
 func NewEngine(config *Config) (*Engine, error) {
   var err error
 
   e := &Engine{
-    wg:       &sync.WaitGroup{},
-    stopchan: make(chan bool),
-    amqpConn: nil,
-    channel:  nil,
-    config:   config,
+    wg:           &sync.WaitGroup{},
+    stopchan:     make(chan bool),
+    amqpConn:     nil,
+    channel:      nil,
+    config:       config,
+    uploaderChan: make(chan *Message),
+    s3Client:     nil,
   }
 
-  if err = e.initQueue(); err != nil {
+  if err = e.createDirs(); err != nil {
+    return nil, err
+  }
+
+  if err = e.initQueues(); err != nil {
     return nil, err
   }
 
@@ -59,13 +88,24 @@ func NewEngine(config *Config) (*Engine, error) {
   return e, nil
 }
 
-func (e *Engine) initQueue() error {
-<<<<<<< HEAD
+func (e *Engine) createDirs() error {
+  var err error
+  dirs := [5]string{mosaicsDir, rawDir, tilesDir, sourceDir, thumbnailsDir}
+  for _, dir := range dirs {
+    newPath := path.Join(e.config.BaseDir, dir)
+    err = os.MkdirAll(newPath, os.ModePerm)
+    if err != nil {
+      return err
+    }
+  }
+  return nil
+}
+
+func (e *Engine) initQueues() error {
+  var err error
+
   keyIn := "engine-in-key"
   keyOut := "engine-out-key"
-=======
-  key := "test-key"
->>>>>>> service/engine
   exchange := "mosaicme"
   amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%s",
     e.config.RabbitUser, e.config.RabbitPassword,
@@ -99,88 +139,106 @@ func (e *Engine) initQueue() error {
     return fmt.Errorf("Exchange Declare: %s", err)
   }
 
-  log.Printf("declared Exchange, declaring Queue-In %q", e.config.QueueInName)
+  log.Printf("declared Exchange, declaring Queue-In %q", e.config.QueueIn)
   queue, err := e.channel.QueueDeclare(
-    e.config.QueueInName, // name of the queue
-    true,               // durable
-    false,              // delete when usused
-    false,              // exclusive
-    false,              // noWait
-    nil,                // arguments
+    e.config.QueueIn, // name of the queue
+    true,             // durable
+    false,            // delete when usused
+    false,            // exclusive
+    false,            // noWait
+    nil,              // arguments
   )
   if err != nil {
     return fmt.Errorf("Queue-in Declare: %s", err)
   }
 
-
   log.Printf("declared Queue-In (%q %d messages, %d consumers), binding to Exchange (key %q)",
-    e.config.QueueInName, queue.Messages, queue.Consumers, keyIn)
+    e.config.QueueIn, queue.Messages, queue.Consumers, keyIn)
 
-//Bind Queue-in with Exchange
+  //Bind Queue-in with Exchange
   if err = e.channel.QueueBind(
-    e.config.QueueInName, // name of the queue
-    keyIn,                // bindingKey
-    exchange,           // sourceExchange
-    false,              // noWait
-    nil,                // arguments
+    e.config.QueueIn, // name of the queue
+    keyIn,            // bindingKey
+    exchange,         // sourceExchange
+    false,            // noWait
+    nil,              // arguments
   ); err != nil {
     return fmt.Errorf("Queue Bind: %s", err)
   }
-  log.Printf("declared Exchange, declaring Queue-Out %q", e.config.QueueOutName)
+  log.Printf("declared Exchange, declaring Queue-Out %q", e.config.QueueOut)
   queue2, err := e.channel.QueueDeclare(
-    e.config.QueueOutName, // name of the queue
-    true,               // durable
-    false,              // delete when usused
-    false,              // exclusive
-    false,              // noWait
-    nil,                // arguments
+    e.config.QueueOut, // name of the queue
+    true,              // durable
+    false,             // delete when usused
+    false,             // exclusive
+    false,             // noWait
+    nil,               // arguments
   )
   if err != nil {
-<<<<<<< HEAD
     return fmt.Errorf("Queue-Out Declare: %s", err)
-=======
-    return fmt.Errorf("Queue Declare: %s", err)
->>>>>>> service/engine
   }
 
   log.Printf("declared Queue-Out (%q %d messages, %d consumers), binding to Exchange (key %q)",
-    e.config.QueueOutName, queue2.Messages, queue2.Consumers, keyOut)
+    e.config.QueueOut, queue2.Messages, queue2.Consumers, keyOut)
 
-//Bind Queue-out with Exchange
+  //Bind Queue-out with Exchange
   if err = e.channel.QueueBind(
-    e.config.QueueOutName, // name of the queue
-    keyOut,                // bindingKey
-    exchange,           // sourceExchange
-    false,              // noWait
-    nil,                // arguments
+    e.config.QueueOut, // name of the queue
+    keyOut,            // bindingKey
+    exchange,          // sourceExchange
+    false,             // noWait
+    nil,               // arguments
   ); err != nil {
     return fmt.Errorf("Queue Bind: %s", err)
   }
   return nil
 }
 
-<<<<<<< HEAD
+func (e *Engine) initObjectStorage() error {
 
+  log.Println("Initializing object storage client...")
+
+  endpoint := e.config.S3Host + ":" + e.config.S3Port
+  client, err := minio.New(endpoint, e.config.S3AccessKey, e.config.S3SecrectKey, e.config.S3Https)
+  if err != nil {
+    return err
+  }
+  e.s3Client = client
+
+  err = e.createBucket(e.config.BucketIn)
+  if err != nil {
+    return err
+  }
+
+  err = e.createBucket(e.config.BucketOut)
+  if err != nil {
+    return err
+  }
+
+  log.Println("Object storage initialized successfully")
   return nil
 }
 
-=======
->>>>>>> service/engine
-func (e *Engine) initObjectStorage() error {
-  //TODO: Initilize S3 client here
+func (e *Engine) createBucket(bucketName string) error {
+  exists, err := e.s3Client.BucketExists(bucketName)
+  if err != nil {
+    return err
+  }
+  if exists {
+    return nil
+  }
+
+  err = e.s3Client.MakeBucket(bucketName, "us-east-1")
+  if err != nil {
+    return err
+  }
   return nil
 }
 
 func (e *Engine) Start() error {
-<<<<<<< HEAD
-  // download raw images
-  go e.download()
-
-  // run builder
-=======
   // go e.download()
->>>>>>> service/engine
   go e.builder()
+  go e.uploader()
 
   return nil
 }

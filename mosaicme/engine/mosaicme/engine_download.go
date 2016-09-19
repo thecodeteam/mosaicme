@@ -18,21 +18,16 @@ func (e *Engine) download() {
   for {
     select {
     default:
-      rawDir := path.Join(baseDir, "raw")
-      s3Host := e.config.S3Host + ":" + e.config.S3Port
+      rawDir := path.Join(e.config.BaseDir, "raw")
 
       time.Sleep(30000 * time.Millisecond)
-      client, err := minio.NewV2(s3Host, e.config.S3AccessKey, e.config.S3SecrectKey, false)
-      if err != nil {
-        log.Println(err)
-        return
-      }
+
       // Create a done channel to control 'ListObjects' go routine.
       doneCh := make(chan struct{})
 
       // Indicate to our routine to exit cleanly upon return.
       defer close(doneCh)
-      objectCh := client.ListObjects(e.config.BucketRawName, "", false, doneCh)
+      objectCh := e.s3Client.ListObjects(e.config.BucketIn, "", false, doneCh)
       for object := range objectCh {
         if object.Err != nil {
           log.Println(object.Err)
@@ -46,7 +41,7 @@ func (e *Engine) download() {
 
           log.Println(localFilename)
 
-          obj, err := client.GetObject(e.config.BucketRawName, object.Key)
+          obj, err := e.s3Client.GetObject(e.config.BucketIn, object.Key)
           if err != nil {
             log.Fatalln(err)
           }
