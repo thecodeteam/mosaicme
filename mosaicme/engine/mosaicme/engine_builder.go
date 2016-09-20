@@ -27,14 +27,14 @@ func (e *Engine) builder() {
   thumbnailsDir := path.Join(e.config.BaseDir, "thumbnails") // location to store the thumnails for to display it on the website
   consumerTag := "engine"
 
-  log.Printf("Creating tiles into\n")
+  log.Printf("[Builder] Creating tiles into\n")
   if err = e.createTiles(rawDir, tilesDir); err != nil {
-    log.Printf("Error creating tiles: %s\n", err)
+    log.Printf("[Builder] Error creating tiles: %s\n", err)
     close(e.stopchan)
     return
   }
 
-  log.Printf("Starting queue consumer (consumer tag %q)", consumerTag)
+  log.Printf("[Builder] Initializing input queue '%s'\n", e.config.QueueIn)
   deliveries, err := e.channel.Consume(
     e.config.QueueIn, // name
     consumerTag,      // consumerTag,
@@ -45,68 +45,79 @@ func (e *Engine) builder() {
     nil,              // arguments
   )
   if err != nil {
-    log.Printf("Queue Consume Error: %s\n", err)
+    log.Printf("[Builder] Queue Consume Error: %s\n", err)
     close(e.stopchan)
     return
   }
 
-  log.Println("Starting builder goroutine")
+  log.Println("[Builder] Starting goroutine")
+
   for {
     select {
     case d := <-deliveries:
 
-      log.Printf("Got message: %s\n", string(d.Body))
+      mosaicName := uniuri.New() + ".jpg"
+
+      log.Printf("[Builder] %s - Got message: %s\n", mosaicName, string(d.Body))
 
       var m Message
 
+      log.Printf("[Builder] %s - Parsing message\n", mosaicName)
+
       err := json.Unmarshal(d.Body, &m)
       if err != nil {
-        log.Printf("Error parsing JSON: %s\n", err)
-        continue
-      }
-
-      mosaicName := uniuri.New() + "jpg"
-      sourcePath := path.Join(sourceDir, mosaicName)
-
-      err = e.downloadSource(m.ImgURL, sourcePath)
-      if err != nil {
-        log.Printf("Error downloading source image: %s\n", err)
-        continue
-      }
-
-      mosaicPath := path.Join(mosaicsDir, mosaicName)
-
-      if err := e.buildMosaic(sourcePath, mosaicPath, tilesDir); err != nil {
-        log.Printf("Error building mosaic: %s\n", err)
-        continue
-      }
-
-      thumbnailPath := path.Join(thumbnailsDir, mosaicName)
-
-      if err := e.createThumbnail(mosaicPath, thumbnailPath); err != nil {
-        log.Printf("Error creating thumbnail: %s\n", err)
+        log.Printf("[Builder] %s - Error parsing JSON: %s\n", m.MosaicName, err)
         continue
       }
 
       m.MosaicName = mosaicName
-      m.MosaicPath = mosaicPath
-      m.ThumbnailPath = thumbnailPath
+      m.MosaicPath = path.Join(mosaicsDir, mosaicName)
+      m.ThumbnailPath = path.Join(thumbnailsDir, mosaicName)
+      sourcePath := path.Join(sourceDir, m.MosaicName)
 
-      // Send message to uploader goroutine
+      log.Printf("[Builder] %s - Downloading source image from URL: %s\n", m.MosaicName, m.ImgURL)
+
+      err = e.downloadSource(m.ImgURL, sourcePath)
+      if err != nil {
+        log.Printf("[Builder] %s - Error downloading source image: %s\n", m.MosaicName, err)
+        continue
+      }
+
+      log.Printf("[Builder] %s - Downloaded source image\n", m.MosaicName)
+      log.Printf("[Builder] %s - Building mosaic\n", m.MosaicName)
+
+      if err := e.buildMosaic(sourcePath, m.MosaicPath, tilesDir); err != nil {
+        log.Printf("[Builder] %s - Error building mosaic: %s\n", m.MosaicName, err)
+        continue
+      }
+
+      log.Printf("[Builder] %s - Mosaic built\n", m.MosaicName)
+      log.Printf("[Builder] %s - Creating thumbnail\n", m.MosaicName)
+
+      if err := e.createThumbnail(m.MosaicPath, m.ThumbnailPath); err != nil {
+        log.Printf("[Builder] %s - Error creating thumbnail: %s\n", m.MosaicName, err)
+        continue
+      }
+
+      log.Printf("[Builder] %s - Created thumbnail\n", m.MosaicName)
+      log.Printf("[Builder] %s - Sending message to Uploader goroutine\n", m.MosaicName)
+
       e.uploaderChan <- &m
+
+      log.Printf("[Builder] %s - Message sent to Uploader goroutine\n", m.MosaicName)
 
       d.Ack(true)
 
     case <-e.stopchan:
-      log.Println("Stop signal received. Returning...")
+      log.Println("[Builder] Stop signal received. Returning...")
       // will close() the deliveries channel
       if err := e.channel.Cancel(consumerTag, true); err != nil {
-        log.Printf("Consumer cancel failed: %s\n", err)
+        log.Printf("[Builder] Consumer cancel failed: %s\n", err)
         return
       }
 
       if err := e.amqpConn.Close(); err != nil {
-        log.Printf("AMQP connection close error: %s\n", err)
+        log.Printf("[Builder] AMQP connection close error: %s\n", err)
         return
       }
 
