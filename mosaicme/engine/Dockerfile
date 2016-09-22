@@ -8,5 +8,3 @@ RUN apt-get install -y \
     imagemagick
 
 ADD . /go/src/engine
-
-
