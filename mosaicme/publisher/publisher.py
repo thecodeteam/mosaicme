@@ -28,14 +28,15 @@ def main():
             connection = pika.BlockingConnection(pika.ConnectionParameters(
                 host=rmq_host, port=rmq_port, credentials=pika.PlainCredentials(rmq_user, rmq_password)))
             channel = connection.channel()
-            channel.queue_declare(queue=queue_name,durable=True))
+            channel.queue_declare(queue=queue_name,durable=True)
 
             print(' [*] Waiting for Message. To exit press CTRL+C')
 
             def callback(ch, method, properties, body):
                 print(" [x] %r" % body)
                 tweet_back(body)
-			ch.basic_ack(delivery_tag = method.delivery_tag)
+                ch.basic_ack(delivery_tag = method.delivery_tag)
+
             channel.basic_consume(callback, queue=queue_name)
             channel.start_consuming()
 
