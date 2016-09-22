@@ -22,24 +22,22 @@ def main():
         rmq_port = int(os.environ['RABBITMQ_PORT'])
         rmq_user = os.environ['RABBITMQ_USER']
         rmq_password = os.environ['RABBITMQ_PASSWORD']
-        exchange_name= os.environ['Exchange_NAME']
         queue_name = os.environ['Queue_NAME']
 
         try:
             connection = pika.BlockingConnection(pika.ConnectionParameters(
                 host=rmq_host, port=rmq_port, credentials=pika.PlainCredentials(rmq_user, rmq_password)))
             channel = connection.channel()
-            channel.exchange_declare(exchange=exchange_name, type='direct')
-            channel.queue_declare(queue=queue_name)
-            channel.queue_bind(exchange=exchange_name, queue=queue_name)
+            channel.queue_declare(queue=queue_name,durable=True)
 
             print(' [*] Waiting for Message. To exit press CTRL+C')
 
             def callback(ch, method, properties, body):
                 print(" [x] %r" % body)
                 tweet_back(body)
+                ch.basic_ack(delivery_tag = method.delivery_tag)
 
-            channel.basic_consume(callback, queue=queue_name, no_ack=True)
+            channel.basic_consume(callback, queue=queue_name)
             channel.start_consuming()
 
         except Exception as e:
