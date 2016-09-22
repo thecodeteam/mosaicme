@@ -16,7 +16,7 @@ var (
   cfg = mosaicme.Config{
     QueueIn:   *flag.String("queue-in", "engine", "Input queue to receive jobs"),
     QueueOut:  *flag.String("queue-out", "publisher", "Output queue"),
-    BucketIn:  *flag.String("bucket-in", "mosaics-raw", "Bucket for raw images"),
+    BucketIn:  *flag.String("bucket-in", "mosaics-raw", "Bucket for raw images"), //optional
     BucketOut: *flag.String("bucket-out", "mosaics-out", "Bucket for mosaics"),
   }
 )
@@ -29,7 +29,6 @@ func init() {
     fmt.Printf("%+v\n", err)
     os.Exit(1)
   }
-  fmt.Printf("Config: %+v\n", cfg)
 }
 
 func main() {
@@ -44,9 +43,9 @@ func main() {
   c := make(chan os.Signal, 1)
   signal.Notify(c, os.Interrupt, syscall.SIGTERM)
   <-c
-  log.Println("Received interruption...")
-  log.Println("Waiting for goroutines to exit...")
+  log.Println("[Main] Received interruption...")
+  log.Println("[Main] Waiting for goroutines to exit...")
   engine.Stop()
-  log.Println("Exiting...")
+  log.Println("[Main] Exiting...")
   os.Exit(0)
 }

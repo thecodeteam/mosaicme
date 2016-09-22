@@ -18,7 +18,7 @@ func (e *Engine) uploader() {
     e.wg.Done()
   }()
 
-  log.Println("Starting uploader goroutine")
+  log.Println("[Uploader] Starting goroutine")
   for {
     select {
     case m := <-e.uploaderChan:
@@ -82,13 +82,14 @@ func (e *Engine) uploader() {
       }
 
       err = e.channel.Publish(
-        "mosaicme", // exchange
-        "info",     // routing key,
-        false,      // mandatory
-        false,      // immediate
+        "",                // exchange
+        e.config.QueueOut, // routing key (queue name)
+        false,             // mandatory
+        false,             // immediate
         amqp.Publishing{
-          ContentType: "application/json",
-          Body:        mJSON,
+          DeliveryMode: amqp.Persistent,
+          ContentType:  "application/json",
+          Body:         mJSON,
         })
 
       if err != nil {

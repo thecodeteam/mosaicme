@@ -13,6 +13,9 @@ import (
   "github.com/dchest/uniuri"
 )
 
+// builder receives requests from the MosaicMe Listener and generates a mosaic
+// based on a source image. Afterwards, it forwards the request to the uploader
+// goroutine.
 func (e *Engine) builder() {
   e.wg.Add(1)
   defer func() {
@@ -20,11 +23,11 @@ func (e *Engine) builder() {
   }()
 
   var err error
-  rawDir := path.Join(e.config.BaseDir, "raw")               //raw images downloaded from S3
-  tilesDir := path.Join(e.config.BaseDir, "tiles")           // tiles location to store generated tiles images by metapixel
-  sourceDir := path.Join(e.config.BaseDir, "source")         // location to store the original pic to be processed to mosaic
-  mosaicsDir := path.Join(e.config.BaseDir, "mosaics")       // location to store the new generated mosaic image
-  thumbnailsDir := path.Join(e.config.BaseDir, "thumbnails") // location to store the thumnails for to display it on the website
+  rawDir := path.Join(e.config.BaseDir, rawDir)               // raw images downloaded from S3
+  tilesDir := path.Join(e.config.BaseDir, tilesDir)           // tiles location to store generated tiles images by metapixel
+  sourceDir := path.Join(e.config.BaseDir, sourceDir)         // location to store the original pic to be processed to mosaic
+  mosaicsDir := path.Join(e.config.BaseDir, mosaicsDir)       // location to store the new generated mosaic image
+  thumbnailsDir := path.Join(e.config.BaseDir, thumbnailsDir) // location to store the thumnails for to display it on the website
   consumerTag := "engine"
 
   log.Printf("[Builder] Creating tiles into\n")
@@ -45,12 +48,12 @@ func (e *Engine) builder() {
     nil,              // arguments
   )
   if err != nil {
-    log.Printf("[Builder] Queue Consume Error: %s\n", err)
+    log.Printf("[Builder] Queue initialization error: %s\n", err)
     close(e.stopchan)
     return
   }
 
-  log.Println("[Builder] Starting goroutine")
+  log.Printf("[Builder] Queue initialized\n")
 
   for {
     select {
@@ -136,7 +139,7 @@ func (e *Engine) createTiles(rawPath, tilesPath string) error {
   return nil
 }
 
-func (e *Engine) downloadSource(sourceUrl, downloadPath string) error {
+func (e *Engine) downloadSource(sourceURL, downloadPath string) error {
   // Create the file
   out, err := os.Create(downloadPath)
   if err != nil {
@@ -145,7 +148,7 @@ func (e *Engine) downloadSource(sourceUrl, downloadPath string) error {
   defer out.Close()
 
   // Get the data
-  resp, err := http.Get(sourceUrl)
+  resp, err := http.Get(sourceURL)
   if err != nil {
     return err
   }

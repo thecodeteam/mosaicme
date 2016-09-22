@@ -8,17 +8,17 @@ import (
   "time"
 )
 
-func (e *Engine) download() {
+func (e *Engine) downloader() {
   e.wg.Add(1)
   defer func() {
     e.wg.Done()
   }()
 
-  log.Println("Starting download raw images goroutine")
+  log.Println("[Downloader] Starting goroutine")
   for {
     select {
     default:
-      rawDir := path.Join(e.config.BaseDir, "raw")
+      rawDir := path.Join(e.config.BaseDir, rawDir)
 
       time.Sleep(30000 * time.Millisecond)
 

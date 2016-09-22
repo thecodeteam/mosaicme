@@ -24,6 +24,7 @@ const (
   thumbnailsDir = "thumbnails"
 )
 
+// Config contains the configuration information for the Engine struct
 type Config struct {
   QueueIn        string
   QueueOut       string
@@ -41,6 +42,7 @@ type Config struct {
   S3SecrectKey   string `env:"S3_SECRET_KEY,required"`
 }
 
+// Message contains the information to be sent to the next service in the pipeline
 type Message struct {
   TwitterHandler string `json:"twitter_handler"`
   UserName       string `json:"user_name"`
@@ -50,6 +52,7 @@ type Message struct {
   ThumbnailPath  string
 }
 
+// Engine contains the information needed to work
 type Engine struct {
   config       *Config
   wg           *sync.WaitGroup
@@ -60,6 +63,7 @@ type Engine struct {
   s3Client     *minio.Client
 }
 
+// NewEngine initializes an instance of an Engine struct
 func NewEngine(config *Config) (*Engine, error) {
   var err error
 
@@ -73,17 +77,26 @@ func NewEngine(config *Config) (*Engine, error) {
     s3Client:     nil,
   }
 
+  log.Println("[Init] Creating temporary directories")
   if err = e.createDirs(); err != nil {
+    log.Printf("[Init] Error creating temporary directories: %s\n", err)
     return nil, err
   }
+  log.Println("[Init] Temporary directories created")
 
+  log.Println("[Init] Initializing message broker")
   if err = e.initQueues(); err != nil {
+    log.Printf("[Init] Error initializing message broker: %s\n", err)
     return nil, err
   }
+  log.Println("[Init] Message broker initialized")
 
+  log.Println("[Init] Initializing object storage backend")
   if err = e.initObjectStorage(); err != nil {
+    log.Printf("[Init] Error initializing object storage backend: %s\n", err)
     return nil, err
   }
+  log.Println("[Init] Object storage backend initialized")
 
   return e, nil
 }
@@ -104,13 +117,11 @@ func (e *Engine) createDirs() error {
 func (e *Engine) initQueues() error {
   var err error
 
-  keyIn := "engine-in-key"
-  keyOut := "engine-out-key"
-  exchange := "mosaicme"
   amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%s",
     e.config.RabbitUser, e.config.RabbitPassword,
     e.config.RabbitHost, e.config.RabbitPort)
 
+  log.Println("[Init] Connecting to AMQP broker")
   e.amqpConn, err = amqp.Dial(amqpURI)
   if err != nil {
     return fmt.Errorf("Dial: %s", err)
@@ -120,27 +131,14 @@ func (e *Engine) initQueues() error {
     fmt.Printf("closing: %s", <-e.amqpConn.NotifyClose(make(chan *amqp.Error)))
   }()
 
-  log.Printf("got Connection, getting Channel")
+  log.Println("[Init] Got AMQP connection, getting channel")
   e.channel, err = e.amqpConn.Channel()
   if err != nil {
-    return fmt.Errorf("Channel: %s", err)
+    return fmt.Errorf("Error getting channel: %s", err)
   }
 
-  log.Printf("got Channel, declaring Exchange (%q)", exchange)
-  if err = e.channel.ExchangeDeclare(
-    exchange, // name of the exchange
-    "direct", // type
-    true,     // durable
-    false,    // delete when complete
-    false,    // internal
-    false,    // noWait
-    nil,      // arguments
-  ); err != nil {
-    return fmt.Errorf("Exchange Declare: %s", err)
-  }
-
-  log.Printf("declared Exchange, declaring Queue-In %q", e.config.QueueIn)
-  queue, err := e.channel.QueueDeclare(
+  log.Printf("[Init] Declaring queue-in %q", e.config.QueueIn)
+  queueIn, err := e.channel.QueueDeclare(
     e.config.QueueIn, // name of the queue
     true,             // durable
     false,            // delete when usused
@@ -149,24 +147,14 @@ func (e *Engine) initQueues() error {
     nil,              // arguments
   )
   if err != nil {
-    return fmt.Errorf("Queue-in Declare: %s", err)
+    return fmt.Errorf("Error declaring queue-in %q: %s", e.config.QueueIn, err)
   }
 
-  log.Printf("declared Queue-In (%q %d messages, %d consumers), binding to Exchange (key %q)",
-    e.config.QueueIn, queue.Messages, queue.Consumers, keyIn)
+  log.Printf("[Init] Declared queue-in (%q %d messages, %d consumers)\n",
+    e.config.QueueIn, queueIn.Messages, queueIn.Consumers)
 
-  //Bind Queue-in with Exchange
-  if err = e.channel.QueueBind(
-    e.config.QueueIn, // name of the queue
-    keyIn,            // bindingKey
-    exchange,         // sourceExchange
-    false,            // noWait
-    nil,              // arguments
-  ); err != nil {
-    return fmt.Errorf("Queue Bind: %s", err)
-  }
-  log.Printf("declared Exchange, declaring Queue-Out %q", e.config.QueueOut)
-  queue2, err := e.channel.QueueDeclare(
+  log.Printf("[Init] Declaring queue-out %q", e.config.QueueOut)
+  queueOut, err := e.channel.QueueDeclare(
     e.config.QueueOut, // name of the queue
     true,              // durable
     false,             // delete when usused
@@ -175,28 +163,16 @@ func (e *Engine) initQueues() error {
     nil,               // arguments
   )
   if err != nil {
-    return fmt.Errorf("Queue-Out Declare: %s", err)
+    return fmt.Errorf("Error declaring queue-out %q: %s", e.config.QueueOut, err)
   }
 
-  log.Printf("declared Queue-Out (%q %d messages, %d consumers), binding to Exchange (key %q)",
-    e.config.QueueOut, queue2.Messages, queue2.Consumers, keyOut)
+  log.Printf("[Init] Declared queue-out (%q %d messages, %d consumers)\n",
+    e.config.QueueOut, queueOut.Messages, queueOut.Consumers)
 
-  //Bind Queue-out with Exchange
-  if err = e.channel.QueueBind(
-    e.config.QueueOut, // name of the queue
-    keyOut,            // bindingKey
-    exchange,          // sourceExchange
-    false,             // noWait
-    nil,               // arguments
-  ); err != nil {
-    return fmt.Errorf("Queue Bind: %s", err)
-  }
   return nil
 }
 
 func (e *Engine) initObjectStorage() error {
-
-  log.Println("Initializing object storage client...")
 
   endpoint := e.config.S3Host + ":" + e.config.S3Port
   client, err := minio.New(endpoint, e.config.S3AccessKey, e.config.S3SecrectKey, e.config.S3Https)
@@ -215,7 +191,6 @@ func (e *Engine) initObjectStorage() error {
     return err
   }
 
-  log.Println("Object storage initialized successfully")
   return nil
 }
 
@@ -235,6 +210,7 @@ func (e *Engine) createBucket(bucketName string) error {
   return nil
 }
 
+// Start starts the engine
 func (e *Engine) Start() error {
   // go e.download()
   go e.builder()
@@ -243,6 +219,7 @@ func (e *Engine) Start() error {
   return nil
 }
 
+// Stop stops the engine
 func (e *Engine) Stop() error {
   close(e.stopchan)
   e.wg.Wait()
