@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.files          = `git ls-files`.split($/)
   s.executables    = s.files.grep(/^bin/).map { |f| File.basename(f) }
   s.require_paths  = ["lib"]
-  s.homepage       = 'https://github.com/emccode/mosaicme'
+  s.homepage       = 'https://github.com/codedellemc/mosaicme'
   s.license        = 'MIT'
   s.add_dependency 'sneakers', '~>2.3'
   s.add_dependency 'bunny', '~>2.2'

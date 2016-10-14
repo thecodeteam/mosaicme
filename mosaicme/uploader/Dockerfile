@@ -9,8 +9,9 @@ WORKDIR /usr/src/app
 RUN apk --update add git
 RUN apk --update add --virtual build_deps \
  build-base ruby-dev libc-dev linux-headers openssl-dev &&\
+ git init &&\
+ git add -A &&\
  bundle &&\
- gem install uploader &&\
  apk del build_deps
 
 ENTRYPOINT [ "uploader" ]
