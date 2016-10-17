@@ -46,7 +46,7 @@ func (e *Engine) uploader() {
         log.Printf("[Uploader] %s - Error signing URL for high-res mosaic: %s\n", m.MosaicName, err)
         continue
       }
-
+      m.ImgURL=presignedLargeURL
       log.Printf("[Uploader] %s - Generated presigned URL for high-res mosaic: %s\n", m.MosaicName, presignedLargeURL)
       log.Printf("[Uploader] %s - Uploading mosaic thumbnail\n", m.MosaicName)
 
@@ -62,7 +62,8 @@ func (e *Engine) uploader() {
         log.Printf("[Uploader] %s - Error uploading thumbnail to object store: %s\n", m.MosaicName, err)
         continue
       }
-
+	  
+	  
       log.Printf("[Uploader] %s - Uploaded mosaic thumbnail successfully. Size: %d\n", m.MosaicName, n)
       log.Printf("[Uploader] %s - Generating presigned URL for mosaic thumbnail\n", m.MosaicName)
 

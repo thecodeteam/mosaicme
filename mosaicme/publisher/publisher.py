@@ -6,7 +6,7 @@ import logging
 import logging.config
 import signal
 import tweepy
-import urllib3
+
 import requests
 import requests.packages.urllib3
 
@@ -22,7 +22,7 @@ def main():
         rmq_port = int(os.environ['RABBITMQ_PORT'])
         rmq_user = os.environ['RABBITMQ_USER']
         rmq_password = os.environ['RABBITMQ_PASSWORD']
-        queue_name = os.environ['Queue_NAME']
+        queue_name = os.environ['QUEUE-OUT']
 
         try:
             connection = pika.BlockingConnection(pika.ConnectionParameters(
@@ -80,26 +80,16 @@ def tweet_back(message):
         print('Could not parse JSON data. %s' % (str(e),))
         return True
 
+    try:
+        twitter_handler = data['twitter_handler']
+        filename = data['ThumbnailPath']
 
-    twitter_handler = data['twitter_handler']
-    url = data['img_url']
-
-    tweetmsg = tweet_msg % twitter_handler
-
-    requests.packages.urllib3.disable_warnings()
-    filename = 'temp.jpg'
-    request = requests.get(url, stream=True)
-    if request.status_code == 200:
-        with open(filename, 'wb') as image:
-            for chunk in request:
-                image.write(chunk)
-
+        tweetmsg = tweet_msg % twitter_handler
+        print("Publiser - tweet back msg : %s",tweetmsg)
         api.update_with_media(filename, status=tweetmsg)
-        os.remove(filename)
-    else:
-        print("Unable to download image")
-
-    print('complete')
+        print('completed tweeting back')
+    except Exception as e:
+        print('Error during sending tweet out: %s' % (e,))
 
 
 if __name__ == "__main__":

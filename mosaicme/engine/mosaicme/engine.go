@@ -35,9 +35,9 @@ type Config struct {
   RabbitPort     string `env:"RABBITMQ_PORT,required"`
   RabbitUser     string `env:"RABBITMQ_USER,required"`
   RabbitPassword string `env:"RABBITMQ_PASSWORD,required"`
-  S3Host         string `env:"S3_HOST,required"`
-  S3Port         string `env:"S3_PORT,required"`
-  S3Https        bool   `env:"S3_HTTPS,required"`
+  S3Host         string `env:"S3_PUBLIC_HOST,required"`
+  S3Port         string `env:"S3_PUBLIC_PORT,required"`
+  S3Https        bool   `env:"S3_PUBLIC_HTTPS,required"`
   S3AccessKey    string `env:"S3_ACCESS_KEY,required"`
   S3SecrectKey   string `env:"S3_SECRET_KEY,required"`
 }
@@ -212,7 +212,7 @@ func (e *Engine) createBucket(bucketName string) error {
 
 // Start starts the engine
 func (e *Engine) Start() error {
-  // go e.download()
+  go e.downloader()
   go e.builder()
   go e.uploader()
 

@@ -19,6 +19,7 @@ func (e *Engine) downloader() {
     select {
     default:
       rawDir := path.Join(e.config.BaseDir, rawDir)
+      log.Println(rawDir)
 
       time.Sleep(30000 * time.Millisecond)
 
@@ -33,13 +34,13 @@ func (e *Engine) downloader() {
           log.Println(object.Err)
           return
         }
-        log.Println("Found object " + object.Key)
+        log.Println(" [Downloader] Found object " + object.Key)
 
-        var localFilename = rawDir + object.Key
+        var localFilename = rawDir +"/" + object.Key
 
         if _, err := os.Stat(localFilename); os.IsNotExist(err) {
 
-          log.Println(localFilename)
+          //log.Println("[Downloader] saving file "+localFilename)
 
           obj, err := e.s3Client.GetObject(e.config.BucketIn, object.Key)
           if err != nil {
@@ -56,13 +57,13 @@ func (e *Engine) downloader() {
 
         } else {
 
-          log.Println("Skipping " + object.Key)
+          log.Println("[Downloader] Skipping " + object.Key)
         }
 
       }
 
     case <-e.stopchan:
-      log.Println("Stop signal received. Returning...")
+      log.Println("[Downloader] Stop signal received. Returning...")
       return
     }
   }

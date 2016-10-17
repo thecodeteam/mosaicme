@@ -40,9 +40,9 @@ def main():
     try:
         s3_access_key = os.environ['S3_ACCESS_KEY']
         s3_secret_key = os.environ['S3_SECRET_KEY']
-        s3_host = os.environ['S3_HOST']
-        s3_port = int(os.environ['S3_PORT'])
-        s3_is_secure = json.loads(os.environ['S3_HTTPS'].lower())
+        s3_host = os.environ['S3_PUBLIC_HOST']
+        s3_port = int(os.environ['S3_PUBLIC_PORT'])
+        s3_is_secure = json.loads(os.environ['S3_PUBLIC_HTTPS'].lower())
         s3_http_proto = 'https' if s3_is_secure else 'http'
 
         redis_host = os.environ['REDIS_HOST']
@@ -67,7 +67,7 @@ def main():
 
     logger.info('Checking connection with object store...')
     try:
-        bucket = s3_conn.get_bucket("mosaic-outlarge", validate=False)
+        bucket = s3_conn.get_bucket("mosaicme-out", validate=False)
         bucket.list()
     except boto.exception.S3ResponseError:
         logger.error("Could not obtain bucket: mosaic-outlarge")
@@ -89,46 +89,46 @@ def main():
         logger.info('Getting keys from object store...')
 
         try:
-            bucket_small = s3_conn.get_bucket('mosaic-outsmall', validate=False)
-            bucket_large = s3_conn.get_bucket('mosaic-outlarge', validate=False)
+            bucket_small = s3_conn.get_bucket('mosaicme-out', validate=False)
+            bucket_large = s3_conn.get_bucket('mosaicme-out', validate=False)
         except boto.exception.S3ResponseError, e:
             logger.error("Could not get bucket.")
             continue
 
         data = dict()
         data['mosaics'] = []
+    
+        for key in bucket:
+            if ("large/" in key.name and len(key.name)>25):
+		print(key)
+                smallname=key.name.replace("large/","small/")
+                url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaicme-out', key=key.name)
+                url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaicme-out', key=smallname)
+		
+                try:
+                    key_sm = bucket.get_key(key.name)
+                except:
+                    logger.error("Could not get key '%s'" % (key.name, ))
+                
 
-        for key in bucket_small:
-            if key not in bucket_large:
-                continue
-
-            url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outsmall', key=key.name)
-            url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaic-outlarge', key=key.name)
-
-            try:
-                key_sm = bucket_small.get_key(key.name)
-            except:
-                logger.error("Could not get key '%s'" % (key.name, ))
-                continue
-
-            username = key_sm.get_metadata('username')
-            if not username:
-                username = 'DevOpsEMC'
-
-            mosaic = dict()
-            mosaic['id'] = key.name
-            mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
-            mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
-            mosaic['username'] = username
-            mosaic['date'] = key.last_modified
-            try:
-                r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
-            except:
-                logger.error("Could not save mosaics into Redis")
-                continue
-
-            data['mosaics'].append(mosaic)
-
+                username = key_sm.get_metadata('username')
+                if not username:
+                    username = 'DevOpsEMC'
+	      
+                mosaic = dict()
+                mosaic['id'] = key.name
+                mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
+                mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
+                mosaic['username'] = username
+                mosaic['date'] = key.last_modified
+		print (mosaic)
+                try:
+                    r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
+                except:
+                    logger.error("Could not save mosaics into Redis")
+                    continue
+                data['mosaics'].append(mosaic)
+		
         data['size'] = len(data['mosaics'])
         try:
             r.set('mosaic:all', json.dumps(data), ex=CACHE_LIFE)

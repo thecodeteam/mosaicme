@@ -16,8 +16,8 @@ var (
   cfg = mosaicme.Config{
     QueueIn:   *flag.String("queue-in", "engine", "Input queue to receive jobs"),
     QueueOut:  *flag.String("queue-out", "publisher", "Output queue"),
-    BucketIn:  *flag.String("bucket-in", "mosaics-raw", "Bucket for raw images"), //optional
-    BucketOut: *flag.String("bucket-out", "mosaics-out", "Bucket for mosaics"),
+    BucketIn:  *flag.String("bucket-in", "mosaicme-raw", "Bucket for raw images"), //optional
+    BucketOut: *flag.String("bucket-out", "mosaicme-out", "Bucket for mosaics"),
   }
 )
 
