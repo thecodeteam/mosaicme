@@ -46,7 +46,7 @@ func (e *Engine) uploader() {
         log.Printf("[Uploader] %s - Error signing URL for high-res mosaic: %s\n", m.MosaicName, err)
         continue
       }
-      m.ImgURL=presignedLargeURL
+      m.ImgURL=presignedLargeURL.String()
       log.Printf("[Uploader] %s - Generated presigned URL for high-res mosaic: %s\n", m.MosaicName, presignedLargeURL)
       log.Printf("[Uploader] %s - Uploading mosaic thumbnail\n", m.MosaicName)
 

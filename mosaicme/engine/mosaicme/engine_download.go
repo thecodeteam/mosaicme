@@ -34,7 +34,7 @@ func (e *Engine) downloader() {
           log.Println(object.Err)
           return
         }
-        log.Println(" [Downloader] Found object " + object.Key)
+        //log.Println(" [Downloader] Found object " + object.Key)
 
         var localFilename = rawDir +"/" + object.Key
 
@@ -57,7 +57,7 @@ func (e *Engine) downloader() {
 
         } else {
 
-          log.Println("[Downloader] Skipping " + object.Key)
+          //log.Println("[Downloader] Skipping " + object.Key)
         }
 
       }
