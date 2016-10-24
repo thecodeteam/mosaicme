@@ -24,8 +24,8 @@ class TwitterListener(tweepy.StreamListener):
     def on_data(self, str_data):
         try:
             data = json.loads(str_data)
-        except ValueError as e:
-            logger.warning('Could not parse JSON data. %s' % (str(e),))
+        except Exception as e:
+            logger.warning('Could not parse JSON data. Data: %s' % (str(e),))
             return True
 
         twitter_handler = data['user']['screen_name']
@@ -91,7 +91,7 @@ def main():
         print('Hashtag not provided.')
         sys.exit(1)
     hashtags = hashtags.split(",")
-    hashtags = list(map(lambda x:x, hashtags))
+    hashtags = list(map(lambda x: '#'+x, hashtags))
 
     queue = os.getenv('MOSAIC_QUEUE', args.queue)
     if not queue:
@@ -139,7 +139,7 @@ def main():
     logger.info("Queue: %s" % (queue, ))
     logger.info('Listening to hashtags: %s' % (', '.join(hashtags),))
 
-    stream = tweepy.Stream(auth, l,verify=False)
+    stream = tweepy.Stream(auth, l, verify=False)
 
     def signal_handler(signal, frame):
         logger.info('Stopping stream listener gracefully...')
