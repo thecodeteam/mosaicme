@@ -97,38 +97,38 @@ def main():
 
         data = dict()
         data['mosaics'] = []
-    
+
         for key in bucket:
-            if ("large/" in key.name and len(key.name)>25):
-		print(key)
-                smallname=key.name.replace("large/","small/")
+            if ("large/" in key.name and len(key.name) > 25):
+                print(key)
+                smallname=key.name.replace("large/", "small/")
                 url_large = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaicme-out', key=key.name)
                 url_small = s3_conn.generate_url(1000*60*60*24*365, 'GET', bucket='mosaicme-out', key=smallname)
-		
+
                 try:
                     key_sm = bucket.get_key(key.name)
                 except:
                     logger.error("Could not get key '%s'" % (key.name, ))
-                
+
 
                 username = key_sm.get_metadata('username')
                 if not username:
                     username = 'DevOpsEMC'
-	      
+
                 mosaic = dict()
-                mosaic['id'] = key.name
+                mosaic['id'] = key.name.replace('large/', '')
                 mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
                 mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
                 mosaic['username'] = username
                 mosaic['date'] = key.last_modified
-		print (mosaic)
+        print (mosaic)
                 try:
                     r.set('mosaic:{}'.format(key.name), json.dumps(mosaic))
                 except:
                     logger.error("Could not save mosaics into Redis")
                     continue
                 data['mosaics'].append(mosaic)
-		
+
         data['size'] = len(data['mosaics'])
         try:
             r.set('mosaic:all', json.dumps(data), ex=CACHE_LIFE)
