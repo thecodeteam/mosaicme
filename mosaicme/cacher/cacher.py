@@ -114,7 +114,7 @@ def main():
                 username = key_sm.get_metadata('username')
                 if not username:
                     username = 'DevOpsEMC'
-
+                key.name=key.name.replace('large/', '')
                 mosaic = dict()
                 mosaic['id'] = key.name.replace('large/', '')
                 mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
