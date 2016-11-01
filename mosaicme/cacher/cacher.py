@@ -110,11 +110,12 @@ def main():
                 except:
                     logger.error("Could not get key '%s'" % (key.name, ))
 
-
+ 
                 username = key_sm.get_metadata('username')
                 if not username:
                     username = 'DevOpsEMC'
-
+                #Fix web detail section
+                key.name=key.name.replace('large/', '')
                 mosaic = dict()
                 mosaic['id'] = key.name.replace('large/', '')
                 mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
