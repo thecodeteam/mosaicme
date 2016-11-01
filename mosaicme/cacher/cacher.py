@@ -117,7 +117,7 @@ def main():
                 #Fix web detail section
                 key.name=key.name.replace('large/', '')
                 mosaic = dict()
-                mosaic['id'] = key.name.replace('large/', '')
+                mosaic['id'] = key.name
                 mosaic['url_small'] = '{}:{}'.format(s3_http_proto, url_small)
                 mosaic['url_large'] = '{}:{}'.format(s3_http_proto, url_large)
                 mosaic['username'] = username
